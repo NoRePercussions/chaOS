@@ -33,19 +33,17 @@ function startup {
 }
 
 function POST {
-	print "This is a test message".
+	parameter testval.
+	print "This is a " + testval + " message".
 	return "This is a test return".
 }
 
 function test {
 	local processPID is processmanager:spawnProcess(module:utilities:delegate(POST@), 1, list("test")):PID.
-	local testprint is module:utilities:textToRef("print 'Test of string-to-func execution'.").
-	testprint().
+	module:utilities:textToRef("print 'Test of string-to-func execution'.")().
 	processmanager:iterateOverQueues().
 	processmanager:removeProcess(processPID).
 	processmanager:garbageCollector().
-	print module:utilities:reference("module:utilities:textToRef").
-	print module:utilities:stringFunction("print 'Hello, World!'.").
 	print processrecord.
 	print "Done!".
 }
