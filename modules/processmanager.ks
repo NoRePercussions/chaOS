@@ -123,3 +123,5 @@ return lexicon(
 ).
 
 }
+
+global loadingmodule is processmanager@.
