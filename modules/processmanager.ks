@@ -7,8 +7,11 @@ global nextPID is 1.
 global function processmanager {
 
 function makeProcess {
-	parameter func, type is "p",
+	parameter func, ptype is "p",
 	priority is 0, state is list(),
+	reftype is "delegate", source is "",
+	listener is false, listenerref is 0,
+	listenertype is "", listenersource is "",
 	alive is true, name is 0,
 	parent is -1, retain is false.
 
@@ -18,16 +21,25 @@ function makeProcess {
 
 	local newprocess is lexicon().
 	newprocess:add("func", func).
-	newprocess:add("type", type).
+	newprocess:add("ptype", ptype).
 	newprocess:add("PID", nextPID).
 	newprocess:add("alive", alive).
 	newprocess:add("state", state).
+	newprocess:add("reftype", reftype).
+	newprocess:add("source", source).
 	newprocess:add("priority", priority).
 	newprocess:add("name", name).
 	newprocess:add("parent", parent).
 	newprocess:add("children", children).
 	newprocess:add("retain", retain).
 	newprocess:add("remove", removeprocess@:bind(nextPID)).
+	newprocess:add("listener", listener).
+
+	if listener {
+		newprocess:add("listenerref", listenerref@).
+		newprocess:add("listenertype", listenertype).
+		newprocess:add("listenersource", listenersource).
+	}.
 
 	processrecord:add(nextPID, newprocess).
 	set nextPID to nextPID + 1.
@@ -36,19 +48,49 @@ function makeProcess {
 }
 
 function spawnProcess {
-	parameter func, priority is 0, state is list().
+	parameter funcobject, priority is 0, state is list().
+	local source is "".
+	if funcobject:type = "reference" { set source to funcobject:reference. }.
+	if funcobject:type = "stringFunction" { set source to funcobject:string. }.
+	if funcobject:type = "delegate" { module:utilities:raiseWarning("Delegates cannot be saved and will be discarded on restart"). }.
 
-	local newprocess is makeprocess(func@, "p", priority, state).
+	local newprocess is makeprocess(funcobject:delegate@, "p",
+		priority, state, funcobject:type, source).
 	processqueue[priority]:push(newprocess:PID).
 
 	return newprocess.
 }
 
 function spawnDaemon {
-	parameter func, priority is 0, state is list().
+	parameter funcobject, priority is 0, state is list().
+	local source is "".
+	if funcobject:type = "reference" { set source to funcobject:reference. }.
+	if funcobject:type = "stringFunction" { set source to funcobject:string. }.
+	if funcobject:type = "delegate" { module:utilities:raiseWarning("Delegates cannot be saved and will be discarded on restart"). }.
 
-	local newprocess is makeprocess(func@, "d", priority, state).
-	processqueue[priority]:push(newprocess:PID).
+	local newprocess is makeprocess(funcobject:delegate@, "d",
+		priority, state, funcobject:type, source).
+	daemonqueue[priority]:push(newprocess:PID).
+
+	return newprocess.
+}
+
+function spawnListener {
+	parameter listenerobject, funcobject, priority is 0, state is list().
+	local source is "".
+	if funcobject:type = "reference" { set source to funcobject:reference. }.
+	if funcobject:type = "stringFunction" { set source to funcobject:string. }.
+	if funcobject:type = "delegate" { module:utilities:raiseWarning("Delegates cannot be saved and will be discarded on restart"). }.
+
+	local listenersource is "".
+	if listenerobject:type = "reference" { set source to listenerobject:reference. }.
+	if listenerobject:type = "stringFunction" { set source to listenerobject:string. }.
+	if listenerobject:type = "delegate" { module:utilities:raiseWarning("Delegates cannot be saved and will be discarded on restart"). }.
+
+	local newprocess is makeprocess(funcobject:delegate@, "l",
+		priority, state, funcobject:type, source,
+		true, listenerobject:delegate@, listenerobject:type, listenersource).
+	listenerqueue[priority]:push(newprocess:PID).
 
 	return newprocess.
 }
@@ -83,7 +125,7 @@ function iterateOverQueues {
 			until pQueue[priority]:empty() {
 				if time:seconds <> startTime { break. }.
 				local PIDToExecute is pQueue[priority]:pop().
-				local pType is processrecord[PIDToExecute]:type.
+				local pType is processrecord[PIDToExecute]:ptype.
 				local returnValue is processmanager:executeProcessByPID(PIDToExecute).
 				print returnValue.
 				if pType = "d" { daemonqueue:push(PIDToExecute). }.
