@@ -1,5 +1,6 @@
 // chaosinit.ks
 clearscreen.
+cd("1:/chaos/").
 if exists("1:/chaos/savedata/persist.dat") {
 	// revertfromsave().
 } else {
@@ -16,17 +17,18 @@ function firstruninit {
 }
 
 function startup {
-	copypath("0:/chaos/modules/", "1:/chaos/modules/").
-	copypath("0:/chaos/libraries/", "1:/chaos/libraries/").
+	copypath("0:/chaos/modules/", "1:/chaos/").
+	copypath("0:/chaos/libraries/", "1:/chaos/").
 
 	global processrecord is lexicon().
 
-	global processqueue is list(queue(), queue(), queue(), queue()). // 0-3 by priorit
+	global processqueue is list(queue(), queue(), queue(), queue()). // 0-3 by priority
 	global daemonqueue is list(queue(), queue(), queue(), queue()).
 	global listenerqueue is list(queue(), queue(), queue(), queue()).
+	global module is lexicon().
+	global library is lexicon().
 
 	runoncepath("1:/chaos/modules/modulemanager").
-	global processmanager is processmanager().
 	test().
 }
 
@@ -41,5 +43,6 @@ function test {
 	processmanager:removeProcess(processPID).
 	processmanager:garbageCollector().
 	print processrecord.
+	print module.
 	print "Done!".
 }
