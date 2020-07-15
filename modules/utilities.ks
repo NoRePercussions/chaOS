@@ -5,8 +5,9 @@ global function utilities {
 
 function textToRef {
 	parameter plaintextfunction.
-	log "global function execfunc { " + plaintextfunction:replace("'", char(34)) + " }." to "1:/chaos/savedata/temp.ks".
-	print open("1:/chaos/savedata/temp.ks"):readall:string.
+	log "global function execfunc { "
+	+ plaintextfunction:replace("'", char(34))
+	+ " }." to "1:/chaos/savedata/temp.ks".
 	runpath("1:/chaos/savedata/temp.ks").
 	local out is execfunc@.
 	deletepath("1:/chaos/savedata/temp.ks").
@@ -30,7 +31,6 @@ function reference {
 	parameter ref.
 	local path is ref:split(":").
 	local func is 0.
-	print path.
 	if path[0] = "module" {
 		local pos is module. path:remove(0).
 		for p in path:sublist(0, path:length-1) {
