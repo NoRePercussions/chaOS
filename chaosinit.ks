@@ -44,7 +44,8 @@ function test {
 	processmanager:iterateOverQueues().
 	processmanager:removeProcess(processPID).
 	processmanager:garbageCollector().
+	print module:utilities:reference("module:utilities:textToRef").
+	print module:utilities:stringFunction("print 'Hello, World!'.").
 	print processrecord.
-	print module.
 	print "Done!".
 }
