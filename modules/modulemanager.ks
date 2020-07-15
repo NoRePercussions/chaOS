@@ -8,6 +8,10 @@ global processmanager is processmanager().
 // Modules are intended as extensions of the OS
 cd("1:/chaos/modules").
 
+set loadinglibrary to {return lexicon().}.
+
+local loadqueue is queue().
+
 local modulelist is list().
 list files in modulelist.
 for opmodule in modulelist {
@@ -15,6 +19,7 @@ for opmodule in modulelist {
 		local truncmodule is opmodule:name:split(".ks")[0].
 		runoncepath(truncmodule).
 		local modlex is loadingmodule().
+		if modlex:haskey("onload") { loadqueue:push(modlex:onload@). }.
 		module:add(truncmodule, modlex).
 	}
 }
@@ -27,8 +32,14 @@ local liblist is list().
 list files in liblist.
 for lib in liblist {
 	local trunclibrary is lib:name:split(".ks")[0].
-	local liblex is { return runoncepath(trunclibrary). }.
+	runoncepath(trunclibrary).
+	local liblex is loadinglibrary().
+	if liblex:haskey("onload") { loadqueue:push(modlex:onload@). }.
 	library:add(trunclibrary, liblex).
 }
 
 cd("1:/chaos/").
+
+for loadscript in loadqueue {
+	loadscript().
+}
