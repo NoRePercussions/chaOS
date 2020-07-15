@@ -39,6 +39,8 @@ function POST {
 
 function test {
 	local processPID is processmanager:spawnProcess(POST@, 1, list("test")):PID.
+	local testprint is module:utilities:textToRef("print 'Test of string-to-func execution'.").
+	testprint().
 	processmanager:iterateOverQueues().
 	processmanager:removeProcess(processPID).
 	processmanager:garbageCollector().
