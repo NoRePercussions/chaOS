@@ -13,9 +13,63 @@ function textToRef {
 	return out@.
 }
 
+function raiseWarning {
+	parameter warningtext.
+	print "Warning: " + warningtext. // Will be improved in text library
+}
+
+function delegate {
+	parameter func.
+	local object is lexicon(
+		"delegate", func@,
+		"type", "delegate").
+	return object.
+}
+
+function reference {
+	parameter ref.
+	local path is ref:split(":").
+	local func is 0.
+	print path.
+	if path[0] = "module" {
+		local pos is module. path:remove(0).
+		for p in path:sublist(0, path:length-1) {
+			set pos to pos[p].
+		}.
+		set func to pos[path[path:length-1]].
+	}
+	if path[0] = "library" {
+		local pos is library. path:remove(0).
+		for p in path:sublist(0, path:length-1) {
+			set pos to pos[p].
+		}.
+		set func to pos[path[path:length-1]].
+	}
+	local object is lexicon(
+		"delegate", func@,
+		"reference", ref,
+		"type", "reference").
+	return object.
+}
+
+
+function stringFunction {
+	parameter stringtext.
+	local func is textToRef(stringtext).
+	local object is lexicon(
+		"delegate", func@,
+		"string", stringtext,
+		"type", "stringFunction").
+	return object.
+}
+
 
 return lexicon(
-	"textToRef", textToRef@
+	"textToRef", textToRef@,
+	"raiseWarning", raiseWarning@,
+	"delegate", delegate@,
+	"reference", reference@,
+	"stringFunction", stringFunction@
 ).
 
 }
