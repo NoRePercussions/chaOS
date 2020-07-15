@@ -99,7 +99,7 @@ function executeProcessByPID {
 	parameter PID.
 	if processrecord:haskey(PID) {
 		local initstate is processrecord[PID]:state.
-		return processrecord[PID]:func().
+		return unpackListToParams(processrecord[PID]:func@, initstate):call().
 	}
 	return "Error".
 }
@@ -120,14 +120,22 @@ function iterateOverQueues {
 	local startTime is time:seconds.
 	for priority in range(3, 0-1) {
 		if time:seconds <> startTime { break. }.
-		for pQueue in list(processqueue, daemonqueue)  {//also listenerqueue??
+		for activelistener in listenerqueue[priority] {
+			if activelistener:listenerref:call() {
+				local PIDToExecute is listenerqueue:pop().
+				processrecord[PIDToExecute]
+				:add("returnValue", processmanager:executeProcessByPID(PIDToExecute)).
+				processmanager:removeProcess(PIDToExecute).
+			}
+		}
+		for pQueue in list(processqueue, daemonqueue)  {
 			if time:seconds <> startTime { break. }.
 			until pQueue[priority]:empty() {
 				if time:seconds <> startTime { break. }.
 				local PIDToExecute is pQueue[priority]:pop().
 				local pType is processrecord[PIDToExecute]:ptype.
-				local returnValue is processmanager:executeProcessByPID(PIDToExecute).
-				print returnValue.
+				processrecord[PIDToExecute]
+				:add("returnValue", processmanager:executeProcessByPID(PIDToExecute)).
 				if pType = "d" { daemonqueue:push(PIDToExecute). }.
 				if pType = "p" { processmanager:removeProcess(PIDToExecute). }.
 			}
