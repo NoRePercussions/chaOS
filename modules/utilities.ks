@@ -16,7 +16,7 @@ function textToRef {
 
 function raiseWarning {
 	parameter warningtext.
-	print "Warning: " + warningtext. // Will be improved in text library
+	module:ui:record("Warning: " + warningtext). // Will be improved in text library
 }
 
 function delegate {
@@ -67,6 +67,7 @@ function stringFunction {
 return lexicon(
 	"textToRef", textToRef@,
 	"raiseWarning", raiseWarning@,
+	"throwWarning", raiseWarning@,
 	"delegate", delegate@,
 	"reference", reference@,
 	"stringFunction", stringFunction@
