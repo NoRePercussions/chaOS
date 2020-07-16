@@ -51,8 +51,9 @@ global function ui {
 		local commandbox is body:addtextfield("").
 		set commandbox:tooltip to "Type a command here...".
 		// :onconfirm runs on any gui interaction, so onchange is used.
-		set commandbox:onchange to {
+		set commandbox:onconfirm to {
 			parameter cmd.
+			if cmd:length = 0 return.
 			commandqueue:push(cmd).
 			set commandbox:text to "".
 			module:utilities:raiseWarning("Commands are not yet supported").
