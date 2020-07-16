@@ -32,6 +32,7 @@ function makeProcess {
 	newprocess:add("reftype", reftype).
 	newprocess:add("source", source).
 	newprocess:add("frequencyratio", frequencyratio).
+	newprocess:add("frequencyoffset", floor(random()*25)).
 	newprocess:add("priority", priority).
 	newprocess:add("name", name).
 	newprocess:add("parent", parent).
@@ -145,7 +146,7 @@ function iterateOverQueues {
 
 		for daemon in daemonqueue[priority] {
 			if time:seconds <> startTime { break. }.
-			if mod(processorcycle, 1/processrecord[daemon]:frequencyratio) >= 1 {
+			if mod(processorcycle + processrecord[daemon]:frequencyoffset, 1/processrecord[daemon]:frequencyratio) >= 1 {
 				local PIDToExecute is daemon.
 				set processrecord[PIDToExecute]
 				:returnValue to processmanager:executeProcessByPID(PIDToExecute)().
