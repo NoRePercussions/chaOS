@@ -35,6 +35,8 @@ function makeProcess {
 	newprocess:add("remove", removeprocess@:bind(nextPID)).
 	newprocess:add("listener", listener).
 
+	newprocess:add("returnValue", "None").
+
 	if listener {
 		newprocess:add("listenerref", listenerref@).
 		newprocess:add("listenertype", listenertype).
@@ -134,9 +136,9 @@ function iterateOverQueues {
 				if time:seconds <> startTime { break. }.
 				local PIDToExecute is pQueue[priority]:pop().
 				local pType is processrecord[PIDToExecute]:ptype.
-				processrecord[PIDToExecute]
-				:add("returnValue", processmanager:executeProcessByPID(PIDToExecute)).
-				if pType = "d" { daemonqueue:push(PIDToExecute). }.
+				set processrecord[PIDToExecute]
+				:returnValue to processmanager:executeProcessByPID(PIDToExecute)().
+				if pType = "d" { daemonqueue[priority]:push(PIDToExecute). }.
 				if pType = "p" { processmanager:removeProcess(PIDToExecute). }.
 			}
 		}
