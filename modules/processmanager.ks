@@ -6,10 +6,14 @@ global nextPID is 1.
 
 global function processmanager {
 
+local updatecycle is 0.
+local processorcycle is 0.
+
 function makeProcess {
 	parameter func, ptype is "p",
 	priority is 0, state is list(),
 	reftype is "delegate", source is "",
+	frequencyratio is 1,
 	listener is false, listenerref is 0,
 	listenertype is "", listenersource is "",
 	alive is true, name is 0,
@@ -27,6 +31,7 @@ function makeProcess {
 	newprocess:add("state", state).
 	newprocess:add("reftype", reftype).
 	newprocess:add("source", source).
+	newprocess:add("frequencyratio", frequencyratio).
 	newprocess:add("priority", priority).
 	newprocess:add("name", name).
 	newprocess:add("parent", parent).
@@ -64,14 +69,14 @@ function spawnProcess {
 }
 
 function spawnDaemon {
-	parameter funcobject, priority is 0, state is list().
+	parameter funcobject, priority is 0, state is list(), frequencyratio is 1.
 	local source is "".
 	if funcobject:type = "reference" { set source to funcobject:reference. }.
 	if funcobject:type = "stringFunction" { set source to funcobject:string. }.
 	if funcobject:type = "delegate" { module:utilities:raiseWarning("Delegates cannot be saved and will be discarded on restart"). }.
 
 	local newprocess is makeprocess(funcobject:delegate@, "d",
-		priority, state, funcobject:type, source).
+		priority, state, funcobject:type, source, frequencyratio).
 	daemonqueue[priority]:push(newprocess:PID).
 
 	return newprocess.
@@ -119,28 +124,38 @@ function removeProcess {
 }
 
 function iterateOverQueues {
+	set updatecycle to updatecycle + 1.
+	// Appears to run at 50 update ticks per second ??
+	if mod(updatecycle, 50/chaOSconfig:ups) >= 1  { return. }.
+	set processorcycle to processorcycle + 1.
 	local startTime is time:seconds.
 	for priority in range(3, 0-1) {
 		if time:seconds <> startTime { break. }.
-		for activelistener in listenerqueue[priority] {
-			if activelistener:listenerref:call() {
-				local PIDToExecute is listenerqueue:pop().
+
+		for l in range(listenerqueue[priority]:length) {
+			if time:seconds <> startTime { break. }.
+			local listener is listenerqueue[priority]:pop().
+			if processrecord[listener]:listenerref:call() {
+				local PIDToExecute is listener.
 				processrecord[PIDToExecute]
 				:add("returnValue", processmanager:executeProcessByPID(PIDToExecute)).
 				processmanager:removeProcess(PIDToExecute).
-			}
+			} else { listenerqueue:push(listener). }.
 		}
-		for pQueue in list(processqueue, daemonqueue)  {
+
+		for daemon in daemonqueue[priority] {
 			if time:seconds <> startTime { break. }.
-			until pQueue[priority]:empty() {
-				if time:seconds <> startTime { break. }.
-				local PIDToExecute is pQueue[priority]:pop().
-				local pType is processrecord[PIDToExecute]:ptype.
+			if mod(processorcycle, 1/processrecord[daemon]:frequencyratio) >= 1 {
+				local PIDToExecute is daemon.
 				set processrecord[PIDToExecute]
 				:returnValue to processmanager:executeProcessByPID(PIDToExecute)().
-				if pType = "d" { daemonqueue[priority]:push(PIDToExecute). }.
-				if pType = "p" { processmanager:removeProcess(PIDToExecute). }.
 			}
+		}
+
+		until processqueue[priority]:empty() or time:seconds <> startTime {
+			local PIDToExecute is processqueue[priority]:pop().
+			set processrecord[PIDToExecute]
+			:returnValue to processmanager:executeProcessByPID(PIDToExecute)().
 		}
 	}
 }
@@ -162,6 +177,10 @@ function unpackListToParams {
 	return bindingfunction@.
 }
 
+function onload {
+	chaOSconfig:add("ups", 50).
+}
+
 return lexicon(
 	"makeProcess", makeProcess@,
 	"spawnProcess", spawnProcess@,
@@ -171,7 +190,8 @@ return lexicon(
 	"executeProcessByPID", executeProcessByPID@,
 	"iterateOverQueues", iterateOverQueues@,
 	"garbageCollector", garbageCollector@,
-	"unpackListToParams", unpackListToParams@
+	"unpackListToParams", unpackListToParams@,
+	"onload", onload@
 ).
 
 }
