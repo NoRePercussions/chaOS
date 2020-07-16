@@ -1,6 +1,9 @@
 // chaosinit.ks
 clearscreen.
 cd("1:/chaos/").
+
+global chaOSconfig is lexicon("startTime", time:seconds, "quit", false).
+
 if exists("1:/chaos/savedata/persist.dat") {
 	// revertfromsave().
 } else {
@@ -29,21 +32,30 @@ function startup {
 	global library is lexicon().
 
 	runoncepath("1:/chaos/modules/modulemanager").
+
+	module:ui:makeActiveGUI().
+
 	test().
+
+	until chaOSconfig:quit {
+		processmanager:iterateOverQueues(). wait 0.
+	}.
+
+	module:ui:gui:dispose().
 }
 
 function POST {
 	parameter testval.
-	print "This is a " + testval + " message".
+	module:ui:debug("This is a " + testval + " message").
 	return "This is a test return".
 }
 
 function test {
 	local processPID is processmanager:spawnProcess(module:utilities:delegate(POST@), 1, list("test")):PID.
-	module:utilities:textToRef("print 'Test of string-to-func execution'.")().
+	module:utilities:textToRef("module:ui:debug('Test of string-to-func execution').")().
 	processmanager:iterateOverQueues().
 	processmanager:removeProcess(processPID).
 	processmanager:garbageCollector().
-	print processrecord.
-	print "Done!".
+	module:ui:debug(processrecord).
+	module:ui:debug("Done!").
 }
