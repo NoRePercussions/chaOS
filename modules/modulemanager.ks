@@ -10,7 +10,7 @@ cd("1:/chaos/modules").
 
 set loadinglibrary to {return lexicon().}.
 
-local loadqueue is queue().
+local loadqueue is queue(mm_onload@).
 
 local modulelist is list().
 list files in modulelist.
@@ -42,4 +42,10 @@ cd("1:/chaos/").
 
 for loadscript in loadqueue {
 	loadscript().
+}
+
+function mm_onload {
+	module:ui:addConfigWidget({
+		parameter body. local reloadswitch is body:addbutton("Reload Modules").
+	}).
 }
