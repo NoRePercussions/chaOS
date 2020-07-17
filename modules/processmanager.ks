@@ -180,6 +180,36 @@ function unpackListToParams {
 
 function onload {
 	chaOSconfig:add("ups", 50).
+	module:ui:addConfigWidget(configWidget@).
+}
+
+function configWidget {
+	parameter body.
+	local speedlabel is body:addlabel("Instructions/update (50-2000) and Updates/second (1-50)").
+	set speedlabel:style:align to "CENTER".
+	set speedlabel:style:hstretch to true.
+
+	local speedbox is body:addhlayout().
+
+	set nextdebouncetime to time:seconds + 0.2.
+	local ipubox is speedbox:addtextfield(config:ipu:tostring).
+	set ipubox:onconfirm to {
+		parameter newipu.
+		if newipu:length = 0 or time:seconds < nextdebouncetime return.
+		set nextdebouncetime to time:seconds + 0.2.
+		set config:ipu to newipu:toscalar. set ipubox:text to config:ipu:tostring.
+		module:ui:debug("New IPU: " + config:ipu:tostring).
+	}.
+	local ipulabel is speedbox:addlabel("IPU").
+	local upsbox is speedbox:addtextfield(chaOSconfig:ups:tostring).
+	set upsbox:onconfirm to {
+		parameter newups.
+		if newups:length = 0 or time:seconds < nextdebouncetime return.
+		set nextdebouncetime to time:seconds + 0.2.
+		set chaOSconfig:ups to max(min(newups:toscalar,50),1). set upsbox:text to chaOSconfig:ups:tostring.
+		module:ui:debug("New UPS: " + chaOSconfig:ups:tostring).
+	}.
+	local upslabel is speedbox:addlabel("UPS").
 }
 
 return lexicon(
