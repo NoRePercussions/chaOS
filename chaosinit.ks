@@ -11,6 +11,7 @@ if exists("1:/chaos/savedata/persist.dat") {
 			startup().
 		} else {
 			firstruninit().
+			startup().
 		}
 }
 
