@@ -81,7 +81,38 @@ global function ui {
 			set gui:widgets[1]:widgets[1]:widgets[0]:text to logToConsole().
 			set logupdated to false.
 			set gui:widgets[1]:widgets[0]:widgets[1]:pressed to chaOSconfig:debug.
+			gui:widgets[1]:widgets[0]:widgets[1]:show().
 		}
+	}
+
+	function enterEditMode {
+		parameter filename.
+		set opfile to open(filename).
+
+		set guimode to "edit".
+
+		set gui:widgets[1]:widgets[1]:widgets[0]:text to opfile:readall():string.
+		set gui:widgets[1]:widgets[1]:widgets[0]:enabled to true.
+
+		gui:widgets[1]:widgets[0]:widgets[1]:hide(). // Hide debug checklist
+		gui:widgets[1]:widgets[2]:dispose(). // Remove command box
+
+		local editsettings is gui:widgets[1]:addhlayout().
+		local save is editsettings:addbutton("Save").
+		local quit is editsettings:addbutton("Quit").
+
+		set save:onclick to { opfile:clear. opfile:write(gui:widgets[1]:widgets[1]:widgets[0]:text). }.
+		set quit:onclick to {
+			local confirmgui is gui(200). confirmgui:show().
+			local savelabel is confirmgui:addlabel("Save file?").
+			local savebtn is confirmgui:addbutton("Save").
+			set savebtn:onclick to { opfile:clear. opfile:write(gui:widgets[1]:widgets[1]:widgets[0]:text).
+				confirmgui:dispose(). makeActiveGUI(). }.
+			local nosavebtn is confirmgui:addbutton("Don't Save").
+			set nosavebtn:onclick to { confirmgui:dispose(). makeActiveGUI(). }.
+			local cancelbtn is confirmgui:addbutton("Cancel").
+			set cancelbtn:onclick to { confirmgui:dispose(). }.
+		}.
 	}
 
 	function makeConfigGUI {
@@ -153,6 +184,7 @@ global function ui {
 		"makeActiveGUI", makeActiveGUI@,
 		"updateActiveGUI", updateActiveGUI@,
 		"addConfigWidget", addConfigWidget@,
+		"enterEditMode", enterEditMode@,
 		"onload", onload@
 	).
 
