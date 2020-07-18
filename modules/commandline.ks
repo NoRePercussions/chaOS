@@ -3,6 +3,7 @@
 global function commandline {
 
 local commandqueue is queue().
+local inEdit is false.
 
 local commandDatabase is lexicon(
 	"ls", lexicon("func", ls@, "minparams", 0, "maxparams", 1),
@@ -10,6 +11,7 @@ local commandDatabase is lexicon(
 	"whereami", lexicon("func", whereami@, "minparams", 0, "maxparams", 0),
 	"cd", lexicon("func", clcd@, "minparams", 1, "maxparams", 1),
 	"mkdir", lexicon("func", mkdir@, "minparams", 1, "maxparams", 1),
+	"edit", lexicon("func", editfile@, "minparams", 1, "maxparams", 1),
 	"exit", lexicon("func", exit@, "minparams", 0, "maxparams", 0),
 	"help", lexicon("func", help@, "minparams", 0, "maxparams", 0)
 ).
@@ -67,6 +69,12 @@ function mkdir {
 	} else {
 		createdir(dirpath).
 	}
+}
+
+function editfile {
+	parameter filepath.
+
+	module:ui:enterEditMode(filepath).
 }
 
 function exit {
