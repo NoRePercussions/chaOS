@@ -1,6 +1,5 @@
 // processmanager.ks
 
-// modulemanager.ks
 
 global nextPID is 1.
 
@@ -139,8 +138,8 @@ function iterateOverQueues {
 			if processrecord[listener]:listenerref:call() {
 				local PIDToExecute is listener.
 				processrecord[PIDToExecute]
-				:add("returnValue", processmanager:executeProcessByPID(PIDToExecute)).
-				processmanager:removeProcess(PIDToExecute).
+				:add("returnValue", executeProcessByPID(PIDToExecute)).
+				self:removeProcess(PIDToExecute).
 			} else { listenerqueue:push(listener). }.
 		}
 
@@ -149,14 +148,14 @@ function iterateOverQueues {
 			if mod(processorcycle + processrecord[daemon]:frequencyoffset, 1/processrecord[daemon]:frequencyratio) >= 1 {
 				local PIDToExecute is daemon.
 				set processrecord[PIDToExecute]
-				:returnValue to processmanager:executeProcessByPID(PIDToExecute)().
+				:returnValue to executeProcessByPID(PIDToExecute)().
 			}
 		}
 
 		until processqueue[priority]:empty() or time:seconds <> startTime {
 			local PIDToExecute is processqueue[priority]:pop().
 			set processrecord[PIDToExecute]
-			:returnValue to processmanager:executeProcessByPID(PIDToExecute)().
+			:returnValue to executeProcessByPID(PIDToExecute)().
 		}
 	}
 }
@@ -212,7 +211,7 @@ function configWidget {
 	local upslabel is speedbox:addlabel("UPS").
 }
 
-return lexicon(
+local self is lexicon(
 	"makeProcess", makeProcess@,
 	"spawnProcess", spawnProcess@,
 	"spawnDaemon", spawnDaemon@,
@@ -224,6 +223,8 @@ return lexicon(
 	"unpackListToParams", unpackListToParams@,
 	"onload", onload@
 ).
+
+return self.
 
 }
 
