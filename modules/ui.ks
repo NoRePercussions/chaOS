@@ -4,7 +4,6 @@ global function ui {
 
 	local fulldebug is list().
 	local nodebug is list().
-	local commandqueue is queue().
 	local logupdated is true.
 
 	local configwidgets is list().
@@ -16,17 +15,23 @@ global function ui {
 	chaOSconfig:add("debug", true).
 
 	function debug {
-		parameter text.
+		parameter text, posttext is "".
+		local recordtext is "".
 		set logupdated to true.
-		fulldebug:add(list(time:clock, text)).
+		if posttext:length = 0 { set recordtext to time:clock + ": " + text. }
+		else { set recordtext to text + time:clock + ": " +  posttext. }.
+		fulldebug:add(recordtext).
 		print text.
 	}
 
 	function record {
-		parameter text.
+		parameter text, posttext is "".
+		local recordtext is "".
 		set logupdated to true.
-		fulldebug:add(list(time:clock, text)).
-		nodebug:add(list(time:clock, text)).
+		if posttext:length = 0 { set recordtext to time:clock + ": " + text. }
+		else { set recordtext to text + time:clock + ": " +  posttext. }.
+		fulldebug:add(recordtext).
+		nodebug:add(recordtext).
 		print text.
 	}
 
@@ -50,7 +55,7 @@ global function ui {
 
 		local textcontainer is body:addscrollbox().
 		local textfield is textcontainer:addtextfield(logToConsole()).
-		set textfield:style:width to 440.
+		//set textfield:style:width to 440.
 		set textfield:enabled to false.
 
 		//for i in range(40) {textcontainer:addlabel("test label").}.
@@ -63,9 +68,8 @@ global function ui {
 			parameter cmd.
 			if cmd:length = 0 or time:seconds < nextdebouncetime return.
 			set nextdebouncetime to time:seconds + 0.2.
-			commandqueue:push(cmd).
+			module:commandline:addCommandToQueue(cmd).
 			set commandbox:text to "".
-			module:utilities:raiseWarning("Commands are not yet supported").
 		}.
 
 
@@ -109,25 +113,40 @@ global function ui {
 	function logToConsole {
 		local out is "".
 		if chaOSconfig:debug {
-			for i in fulldebug:copy {
-				set out to out + i:join(": ") + char(10).
+			for line in fulldebug:copy {
+				set out to out + truncateConsoleText(line) + char(10).
 			}
 		} else {
-			for i in nodebug:copy {
-				set out to out + i:join(": ") + char(10).
+			for line in nodebug:copy {
+				set out to out + truncateConsoleText(line) + char(10).
 			}
 		}
 		return out.
+	}
+
+	function truncateConsoleText {
+		parameter text.
+		local lines is text:split(char(10)).
+		local out is list().
+		for line in lines {
+			local lineout is list().
+			until line:length = 0 {
+				lineout:add(line:substring(0, min(line:length, 70))).
+				set line to line:remove(0, min(line:length, 70)).
+			}
+			out:add(lineout:join(char(10))).
+		}
+
+		return out:join(char(10)).
 	}
 
 	function onload {
 		module:processmanager:spawndaemon(module:utilities:reference("module:ui:updateActiveGUI"), 3, list(), 1/5).
 	}
 
-	return lexicon(
+	local self is lexicon(
 		"fulldebug", fulldebug,
 		"nodebug", nodebug,
-		"commandqueue", commandqueue,
 		"gui", gui,
 		"debug", debug@,
 		"record", record@,
@@ -136,6 +155,8 @@ global function ui {
 		"addConfigWidget", addConfigWidget@,
 		"onload", onload@
 	).
+
+	return self.
 }
 
 global loadingmodule is ui@.
