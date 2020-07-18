@@ -39,10 +39,11 @@ function startup {
 	test().
 
 	until chaOSconfig:quit {
-		processmanager:iterateOverQueues(). wait 0.
+		module:processmanager:iterateOverQueues(). wait 0.
 	}.
 
 	module:ui:gui:dispose().
+	cd("1:/chaos/").
 }
 
 function POST {
@@ -52,11 +53,11 @@ function POST {
 }
 
 function test {
-	local processPID is processmanager:spawnProcess(module:utilities:delegate(POST@), 1, list("test")):PID.
+	local processPID is module:processmanager:spawnProcess(
+		module:utilities:delegate(POST@), 1, list("test")):PID.
 	module:utilities:textToRef("module:ui:debug('Test of string-to-func execution').")().
-	processmanager:iterateOverQueues().
-	processmanager:removeProcess(processPID).
-	processmanager:garbageCollector().
-	module:ui:debug(processrecord).
+	module:processmanager:iterateOverQueues().
+	module:processmanager:removeProcess(processPID).
+	module:processmanager:garbageCollector().
 	module:ui:debug("Done!").
 }
