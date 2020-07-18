@@ -1,16 +1,15 @@
 // modulemanager.ks
 // chaOS module manager
 
-runoncepath("1:/chaos/modules/processmanager").
-global processmanager is processmanager().
+global loadingmodule is {}.
 
 // Module processer
 // Modules are intended as extensions of the OS
 cd("1:/chaos/modules").
 
-set loadinglibrary to {return lexicon().}.
+set loadinglibrary to lexicon().
 
-local loadqueue is queue(onload@).
+local loadqueue is queue(mmonload@).
 
 local modulelist is list().
 list files in modulelist.
@@ -24,6 +23,7 @@ for opmodule in modulelist {
 	}
 }
 
+
 // Library processer
 // Libraries are addons of code snippets that do not directly relate to chaOS
 cd("1:/chaos/libraries").
@@ -33,7 +33,7 @@ list files in liblist.
 for lib in liblist {
 	local trunclibrary is lib:name:split(".ks")[0].
 	runoncepath(trunclibrary).
-	local liblex is loadinglibrary().
+	local liblex is loadinglibrary.
 	if liblex:haskey("onload") { loadqueue:push(modlex:onload@). }.
 	library:add(trunclibrary, liblex).
 }
@@ -44,7 +44,7 @@ for loadscript in loadqueue {
 	loadscript().
 }
 
-function onload {
+function mmonload {
 	module:ui:addConfigWidget({
 		parameter body. local reloadswitch is body:addbutton("Reload Modules").
 	}).
