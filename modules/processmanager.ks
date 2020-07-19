@@ -1,7 +1,7 @@
 // processmanager.ks
 
 
-global nextPID is 1.
+chaOSConfig:add("nextPID", 1).
 
 global function processmanager {
 
@@ -20,12 +20,12 @@ function makeProcess {
 
 	local children is list().
 
-	if name = 0 { set name to nextPID. }.
+	if name = 0 { set name to chaOSConfig:nextPID. }.
 
 	local newprocess is lexicon().
 	newprocess:add("func", func).
 	newprocess:add("ptype", ptype).
-	newprocess:add("PID", nextPID).
+	newprocess:add("PID", chaOSConfig:nextPID).
 	newprocess:add("alive", alive).
 	newprocess:add("state", state).
 	newprocess:add("reftype", reftype).
@@ -37,7 +37,7 @@ function makeProcess {
 	newprocess:add("parent", parent).
 	newprocess:add("children", children).
 	newprocess:add("retain", retain).
-	newprocess:add("remove", removeprocess@:bind(nextPID)).
+	newprocess:add("remove", removeprocess@:bind(chaOSConfig:nextPID)).
 	newprocess:add("listener", listener).
 
 	newprocess:add("returnValue", "None").
@@ -48,8 +48,8 @@ function makeProcess {
 		newprocess:add("listenersource", listenersource).
 	}.
 
-	processrecord:add(nextPID, newprocess).
-	set nextPID to nextPID + 1.
+	processrecord:add(chaOSConfig:nextPID, newprocess).
+	set chaOSConfig:nextPID to chaOSConfig:nextPID + 1.
 
 	return newprocess.
 }
@@ -135,27 +135,32 @@ function iterateOverQueues {
 		for l in range(listenerqueue[priority]:length) {
 			if time:seconds <> startTime { break. }.
 			local listener is listenerqueue[priority]:pop().
-			if processrecord[listener]:listenerref:call() {
+			if processrecord[listener]:listenerref:call() and processrecord[listener]:alive {
 				local PIDToExecute is listener.
 				processrecord[PIDToExecute]
 				:add("returnValue", executeProcessByPID(PIDToExecute)).
 				self:removeProcess(PIDToExecute).
-			} else { listenerqueue:push(listener). }.
+			} else if processrecord[listener]:alive { listenerqueue:push(listener). }.
 		}
 
-		for daemon in daemonqueue[priority] {
+		for d in range(daemonqueue[priority]:length) {
 			if time:seconds <> startTime { break. }.
+			local daemon is daemonqueue[priority]:pop().
 			if mod(processorcycle + processrecord[daemon]:frequencyoffset, 1/processrecord[daemon]:frequencyratio) >= 1 {
 				local PIDToExecute is daemon.
 				set processrecord[PIDToExecute]
 				:returnValue to executeProcessByPID(PIDToExecute)().
 			}
+			if processrecord[daemon]:alive { daemonqueue[priority]:push(daemon). }.
 		}
 
 		until processqueue[priority]:empty() or time:seconds <> startTime {
 			local PIDToExecute is processqueue[priority]:pop().
-			set processrecord[PIDToExecute]
-			:returnValue to executeProcessByPID(PIDToExecute)().
+			if processrecord[PIDToExecute]:alive {
+				set processrecord[PIDToExecute]
+				:returnValue to executeProcessByPID(PIDToExecute)().
+				removeProcess(PIDToExecute).
+			}
 		}
 	}
 }
@@ -180,6 +185,7 @@ function unpackListToParams {
 function onload {
 	chaOSconfig:add("ups", 50).
 	module:ui:addConfigWidget(configWidget@).
+	module:processmanager:spawndaemon(module:utilities:reference("module:processmanager:garbageCollector"), 3, list(), 1/500).
 }
 
 function configWidget {
