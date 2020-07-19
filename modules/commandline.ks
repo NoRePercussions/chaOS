@@ -6,14 +6,19 @@ local commandqueue is queue().
 local inEdit is false.
 
 local commandDatabase is lexicon(
-	"ls", lexicon("func", ls@, "minparams", 0, "maxparams", 1),
-	"touch", lexicon("func", touch@, "minparams", 1, "maxparams", 1),
-	"whereami", lexicon("func", whereami@, "minparams", 0, "maxparams", 0),
-	"cd", lexicon("func", clcd@, "minparams", 1, "maxparams", 1),
-	"mkdir", lexicon("func", mkdir@, "minparams", 1, "maxparams", 1),
-	"edit", lexicon("func", editfile@, "minparams", 1, "maxparams", 1),
-	"exit", lexicon("func", exit@, "minparams", 0, "maxparams", 0),
-	"help", lexicon("func", help@, "minparams", 0, "maxparams", 0)
+	"ls", lexicon("func", ls@, "minparams", 0, "maxparams", 1, "man", "ls [directorypath] - List files in selected directory, or current if none is supplied"),
+	"touch", lexicon("func", touch@, "minparams", 1, "maxparams", 1, "man", "touch {filepath} - Creates an empty file at the path"),
+	"whereami", lexicon("func", whereami@, "minparams", 0, "maxparams", 0, "man", "whereami - Print current directory path"),
+	"cd", lexicon("func", clcd@, "minparams", 1, "maxparams", 1, "man", "cd {directorypath} - Changes directory to the one specified"),
+	"mkdir", lexicon("func", mkdir@, "minparams", 1, "maxparams", 1, "man", "mkdir {directorypath} - Created a directory at the path"),
+	"edit", lexicon("func", editfile@, "minparams", 1, "maxparams", 1, "man", "edit {filepath} - Opens the file in the chaOS editor"),
+	"rm", lexicon("func", rm@, "minparams", 1, "maxparams", 1, "man", "rm {filepath} - Removes the file at the path"),
+	"rmdir", lexicon("func", rm@, "minparams", 1, "maxparams", 1, "man", "rmdir {directorypath} - Removes the directory at the path"),
+	"cp", lexicon("func", copy@, "minparams", 1, "maxparams", 2, "man", "cp {frompath} [topath] - copies a file or directory from the frompath to topath (or else current path)"),
+	"mv", lexicon("func", move@, "minparams", 1, "maxparams", 2, "man", "mv {frompath} [topath] - moves a file or directory from the frompath to topath (or else current path)"),
+	"man", lexicon("func", man@, "minparams", 1, "maxparams", 1, "man", "man {command} - Shows information about the command"),
+	"exit", lexicon("func", exit@, "minparams", 0, "maxparams", 0, "man", "exit - Exits chaOS"),
+	"help", lexicon("func", help@, "minparams", 0, "maxparams", 0, "man", "help - Returns a list of CLI commands")
 ).
 
 function ls {
@@ -30,7 +35,7 @@ function ls {
 
 	cd(currentpath).
 
-	module:ui:record(filelist).
+	module:ui:record("Items in " + path() + ":" + char(10) + filelist:join(char(10))).
 
 	} else {
 		module:utilities:raiseError("'" + dirpath + "' is not a valid path").
@@ -71,6 +76,30 @@ function mkdir {
 	}
 }
 
+function rm {
+	parameter filepath.
+	deletepath(filepath).
+}
+
+function copy {
+	parameter oldpath, newpath is path().
+	copypath(oldpath, newpath).
+}
+
+function move {
+	parameter oldpath, newpath is path().
+	movepath(oldpath, newpath).
+}
+
+function man {
+	parameter command.
+	if commandDatabase:haskey(command) = false {
+		module:utilities:raiseError("Function name is not recognized").
+	} else {
+		module:ui:record(commandDatabase[command]:man).
+	}
+}
+
 function editfile {
 	parameter filepath.
 
@@ -82,7 +111,7 @@ function exit {
 }
 
 function help {
-	module:ui:record(commandDatabase:keys).
+	module:ui:record("Run man {command} for more information" + char(10) + commandDatabase:keys:join(char(10))).
 }
 
 function parseFunction {
