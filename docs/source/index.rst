@@ -3,9 +3,6 @@
 chaOS: Operating System and Microkernel for kOS
 ===============================================
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
 
 Making kOS more advanced
 ------------------------
@@ -49,10 +46,3 @@ Place the **chaos** folder into your Ships/Script folder
 and move chaos/boot/chaosboot.ks to the Ships/Script/boot 
 folder. When you launch a vessel, set chaosboot as the boot 
 file to select modules and libraries to copy.
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
