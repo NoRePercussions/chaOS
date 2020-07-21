@@ -1,12 +1,20 @@
 .. _contents:
 
 Table of Contents
------------------
+=================
 
 .. toctree::
     :includehidden:
-    :maxdepth: 4
+    :titlesonly:
+    :maxdepth: 5
 
-    index
-    modules
-    self
+    Home <index>
+    Modules <modules>
+    Table of Contents <self>
+
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`search`
