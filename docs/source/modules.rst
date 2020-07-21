@@ -1,6 +1,10 @@
 .. _modules:
 
+chaOS Modules
+=============
+
 .. toctree::
     :maxdepth: 2
 
-    modules/aboutmodules
+    General Info <modules/aboutmodules>
+    ProcessManager <modules/processmanager>
