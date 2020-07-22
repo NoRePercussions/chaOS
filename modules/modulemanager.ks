@@ -3,6 +3,9 @@
 
 global loadingmodule is {}.
 
+global module is lexicon().
+global library is lexicon().
+
 // Module processer
 // Modules are intended as extensions of the OS
 cd("1:/chaos/modules").
