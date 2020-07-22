@@ -4,6 +4,10 @@
 # list see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 import sphinx_rtd_theme
+
+import sys
+import os
+sys.path.insert(0, os.path.abspath('..'))
 # -- Path setup --------------------------------------------------------------
 
 # If extensions (or modules to document with autodoc) are in another directory,
@@ -30,7 +34,13 @@ release = '0.0.1'
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ["sphinx_rtd_theme"]
+extensions = [
+    'sphinx_rtd_theme',
+    'ksdomain',
+    'KerboscriptLexer',]
+
+primary_domain = 'ks'
+highlight_language = 'kerboscript'
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
