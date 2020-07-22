@@ -19,6 +19,29 @@ as there is no other code for loading modules.
 Key Elements
 ------------
 
+
+The `module` and `library` lexicons
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+chaOS stores all public functions and variables exposed 
+by modules and libraries within these two lexicons. Each 
+module and library has its own lexicon of its functions 
+and variables stored with the key being the name of the 
+module or library. You can use these variables to call 
+or reference other functions, such as the function to 
+raise an error:
+
+::
+
+	module:utilities:raiseError("Ship should not be underground!").
+
+These references can also be used to create an executable 
+type object through ``module:utilities:reference(path)`` 
+where path is a string such as ``"module:utilities:raiseError"`` 
+and the object is returned. Paths to modules are 
+case-insensitive.
+
+
 The loadingmodule Function
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -28,6 +51,7 @@ and `loadinglibrary` respectively when run. These functions
 must take no parameters and return a lexicon of function name 
 and delegate pairs. The `onload` function name is the only 
 special name.
+
 
 The onload Function
 ~~~~~~~~~~~~~~~~~~~
