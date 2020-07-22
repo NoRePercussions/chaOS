@@ -20,17 +20,6 @@ function firstruninit {
 }
 
 function init {
-	copypath("0:/chaos/modules/", "1:/chaos/").
-	copypath("0:/chaos/libraries/", "1:/chaos/").
-
-	global processrecord is lexicon().
-
-	global processqueue is list(queue(), queue(), queue(), queue()). // 0-3 by priority
-	global daemonqueue is list(queue(), queue(), queue(), queue()).
-	global listenerqueue is list(queue(), queue(), queue(), queue()).
-	global module is lexicon().
-	global library is lexicon().
-
 	runoncepath("1:/chaos/modules/modulemanager").
 }
 
