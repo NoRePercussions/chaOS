@@ -5,6 +5,12 @@ chaOSConfig:add("nextPID", 1).
 
 global function processmanager {
 
+global processrecord is lexicon().
+
+global processqueue is list(queue(), queue(), queue(), queue()). // 0-3 by priority
+global daemonqueue is list(queue(), queue(), queue(), queue()).
+global listenerqueue is list(queue(), queue(), queue(), queue()).
+
 local updatecycle is 0.
 local processorcycle is 0.
 
