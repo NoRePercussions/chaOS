@@ -144,6 +144,13 @@ function addCommandToQueue {
 	commandqueue:push(command).
 }
 
+function addCustomCommand {
+	parameter name, delegate, minparams is 0, maxparams is 0, manual is "".
+
+	commandDatabase:add(name, lexicon("func", delegate@,
+		"minparams", minparams, "maxparams", maxparams, "manual", manual)).
+}
+
 function onload {
 	module:ui:record("Run 'help' for a list of commands").
 	module:processmanager:spawnDaemon(
@@ -153,6 +160,7 @@ function onload {
 return lexicon(
 	"parseAllCommands", parseAllCommands@,
 	"addCommandToQueue", addCommandToQueue@,
+	"addCustomCommand", addCustomCommand@,
 	"onload", onload@
 ).
 
