@@ -28,6 +28,61 @@ See the theory section for more information about
 the process structure.
 
 
+Public ProcessManager Variables
+-------------------------------
+
+Processmanager has four global variables - the processRecord, 
+that holds information about all active processes, and three 
+queues of active processes. These queues are really lists each 
+holding four queues, one per priority.
+
+
+processRecord
+~~~~~~~~~~~~~
+
+ProcessRecord is a lexicon with process objects assigned with 
+their keys being their PIDs. The record is periodically cleared 
+of inactive processes by the garbage collector, which is why it 
+is not a list.
+
+
+Queues
+~~~~~~
+
+ProcessManager hold three lists: the process queue (one-off tasks), 
+the daemon queue (repeated tasks), and the listener queue (conditional 
+tasks). Each list consists of four queues at the index of their priority, 
+with 3 being the most important and first executed. The internal queues 
+are sorted first-in, first-out (FIFO). The order of execution of processes 
+is sorted in the following order:
+
+priority > queue (listeners, daemons, processes) > order added (FIFO)
+
+The listener queue gets executed first. Listener-type processes have 
+a function that tests a condition and returns an output. The execution 
+of listeners is designed to be low overhead, high throughput. Listeners 
+typically skip most of the process loading steps and just test the 
+condition, only loading the full process when the condition is met. 
+Best practice is to not put long computations into listener processes, 
+which slows the whole queue, but instead spawn a process or daemon once 
+the condition is met.
+
+The daemon queue is executed next. Daemon-type processes run at a set 
+interval (for example one in five update ticks) and are staggered randomly 
+when spawned, preventing large numbers of daemons spawned in the same tick 
+from piling up overhead. If a daemon is not run during its scheduled tick, 
+it will not be run in the next tick and must instead wait for another 
+scheduled tick. Daemons are great for any code that must be run repeatedly, 
+no matter if they need to run often or infrequently. Daemons are especially 
+useful for repeated calculations or control updates if locks are not an option.
+
+The process queue is the final queue to be executed in each priority step. 
+Processes in this context are one-off tasks that will be run and then removed 
+from the queue. Processes will be run in the next available tick, and will be 
+be postponed by one if there is no more execution time left in the tick. They 
+are great for initial calculations, setup, and anything else that runs once.
+
+
 Public ProcessManager Functions
 -------------------------------
 
