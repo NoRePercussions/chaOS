@@ -28,7 +28,6 @@ function compileProcesses {
 function loadSavedState {
 	chaOSConfig:clear. set chaOSConfig to readjson(savefolder + "config.dat").
 	local queuelist is readjson(savefolder + "queues.dat").
-	print queuelist.
 	processqueue:clear(). set processqueue to queuelist[0].
 	daemonqueue:clear(). set daemonqueue to queuelist[1].
 	listenerqueue:clear(). set listenerqueue to queuelist[2].
