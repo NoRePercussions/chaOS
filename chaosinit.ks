@@ -5,12 +5,12 @@ cd("1:/chaos/").
 global chaOSconfig is lexicon("startTime", time:seconds, "quit", false).
 
 init().
+
+if exists("1:/chaos/savedata/config.txt") = false {
+	firstruninit().
+}
 if exists("1:/chaos/savedata/queues.dat") {
 	revertfromsave().
-} else {
-	if exists("1:/chaos/savedata/config.txt") = false {
-			firstruninit().
-		}
 }
 startup().
 
@@ -21,12 +21,13 @@ function firstruninit {
 
 function init {
 	runoncepath("1:/chaos/modules/modulemanager").
-}
-
-function startup {
+	
 	module:ui:makeActiveGUI().
 
 	test().
+}
+
+function startup {
 
 	until chaOSconfig:quit {
 		module:processmanager:iterateOverQueues(). 
