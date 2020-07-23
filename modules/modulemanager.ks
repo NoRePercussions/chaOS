@@ -40,8 +40,8 @@ for l in range(liblist:length) {
 	local trunclibrary is liblist[l]:name:split(".ks")[0].
 	if liblist:contains(trunclibrary) = false {
 		runoncepath(trunclibrary).
-		local liblex is loadinglibrary.
-		if liblex:haskey("onload") { loadqueue:push(modlex:onload@). }.
+		local liblex is loadinglibrary().
+		if liblex:haskey("onload") { loadqueue:push(liblex:onload@). }.
 		library:add(trunclibrary, liblex).
 		set liblist[l] to trunclibrary.
 	} else set liblist[l] to "".
