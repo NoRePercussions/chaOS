@@ -101,7 +101,7 @@ function spawnListener {
 	if listenerobject:type = "delegate" { module:utilities:raiseWarning("Delegates cannot be saved and will be discarded on restart"). }.
 
 	local newprocess is makeprocess(funcobject:delegate@, "l",
-		priority, state, funcobject:type, source,
+		priority, state, funcobject:type, source, 0,
 		true, listenerobject:delegate@, listenerobject:type, listenersource).
 	listenerqueue[priority]:push(newprocess:PID).
 
@@ -142,11 +142,11 @@ function iterateOverQueues {
 			if time:seconds <> startTime { break. }.
 			local listener is listenerqueue[priority]:pop().
 			if processrecord[listener]:listenerref:call() and processrecord[listener]:alive {
-				local PIDToExecute is listener.
-				processrecord[PIDToExecute]
-				:add("returnValue", executeProcessByPID(PIDToExecute)).
-				self:removeProcess(PIDToExecute).
-			} else if processrecord[listener]:alive { listenerqueue:push(listener). }.
+				print "executing listener".
+				set processrecord[listener]
+				:returnValue to executeProcessByPID(listener).
+				self:removeProcess(listener).
+			} else if processrecord[listener]:alive { listenerqueue[priority]:push(listener). }.
 		}
 
 		for d in range(daemonqueue[priority]:length) {
@@ -227,6 +227,7 @@ local self is lexicon(
 	"makeProcess", makeProcess@,
 	"spawnProcess", spawnProcess@,
 	"spawnDaemon", spawnDaemon@,
+	"spawnListener", spawnListener@,
 	"respawnProcess", respawnProcess@,
 	"removeProcess", removeProcess@,
 	"executeProcessByPID", executeProcessByPID@,
