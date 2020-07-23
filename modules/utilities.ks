@@ -3,15 +3,39 @@
 
 global function utilities {
 
+global currentFunc is {print "ERROR". }.
+local counter is 1.
+local abc is "abcdefghij".
+
+// Does not create new funtions unless both 
+// the file name and creation function name 
+// are unique. Dunno why, but now it works.
 function textToRef {
 	parameter plaintextfunction.
-	log "global function execfunc { "
-	+ plaintextfunction:replace("'", char(34))
-	+ " }." to "1:/chaos/savedata/temp.ks".
-	runpath("1:/chaos/savedata/temp.ks").
-	local out is execfunc@.
-	deletepath("1:/chaos/savedata/temp.ks").
+	local endText is appendText().
+	log "global function execfunc" + endText + " { "
+		+ plaintextfunction:replace("'", char(34))
+		+ " }. set currentFunc to execfunc" + endText + "@." 
+		to "1:/chaos/savedata/temp" + endText + ".ks".
+	runpath("1:/chaos/savedata/temp" + endText + ".ks").
+	local out is currentFunc@.
+	deletepath("1:/chaos/savedata/temp" + endText + ".ks").
 	return out@.
+}
+
+function appendText {
+	local l10 is ceiling(log10(counter)).
+	local operating is counter.
+	set counter to counter + 1.
+	local out is "".
+
+	for i in range(l10) {
+		local m10 is mod(operating, 10).
+		set operating to (operating-m10)/10.
+		set out to out + abc[m10].
+	}
+
+	return out.
 }
 
 function raiseWarning {
