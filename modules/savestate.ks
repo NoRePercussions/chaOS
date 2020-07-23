@@ -46,7 +46,7 @@ function restoreProcesses {
 			set prepr[PID]:func to module:utilities:reference(prepr[PID]:source):delegate@.
 		}
 
-		if prepr[PID]:ptype = "listener" and prepr[PID]:haskey("listenersource") {
+		if prepr[PID]:ptype = "l" and prepr[PID]:haskey("listenersource") {
 			if prepr[PID]:listenertype = "delegate" {
 				prepr:remove(PID).
 			} else if prepr[PID]:listenertype = "stringFunction" {
