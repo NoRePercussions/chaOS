@@ -47,7 +47,10 @@ function POST {
 function test {
 	local processPID is module:processmanager:spawnProcess(
 		module:utilities:delegate(POST@), 1, list("test")):PID.
-	module:utilities:textToRef("module:ui:debug('Test of string-to-func execution').")().
+	module:processmanager:spawnListener(
+		module:utilities:stringFunction("if time:seconds >=  10 + " + time:seconds + " return true. return false."),
+		module:utilities:stringFunction("module:ui:debug('Listener has fired!')."),
+		0, list()).
 	module:ui:debug("Done!").
 }
 
