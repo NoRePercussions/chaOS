@@ -96,8 +96,8 @@ function spawnListener {
 	if funcobject:type = "delegate" { module:utilities:raiseWarning("Delegates cannot be saved and will be discarded on restart"). }.
 
 	local listenersource is "".
-	if listenerobject:type = "reference" { set source to listenerobject:reference. }.
-	if listenerobject:type = "stringFunction" { set source to listenerobject:string. }.
+	if listenerobject:type = "reference" { set listenersource to listenerobject:reference. }.
+	if listenerobject:type = "stringFunction" { set listenersource to listenerobject:string. }.
 	if listenerobject:type = "delegate" { module:utilities:raiseWarning("Delegates cannot be saved and will be discarded on restart"). }.
 
 	local newprocess is makeprocess(funcobject:delegate@, "l",
