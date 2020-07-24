@@ -31,7 +31,7 @@ function startup {
 
 	until chaOSconfig:quit {
 		module:processmanager:iterateOverQueues(). 
-		module:savestate:saveCurrentState().
+		if mod(updatecycle,20) = 0 { module:savestate:saveCurrentState(). }
 		wait 0.
 	}.
 
