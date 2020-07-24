@@ -1,11 +1,10 @@
 // chaosboot.ks
 
-wait 5.
-createdir("1:/chaos/").
+if exists("1:/chaos/") = false createdir("1:/chaos/").
 cd("1:/chaos/").
-createdir("1:/chaos/modules/").
-createdir("1:/chaos/libraries/").
-createdir("1:/chaos/programs/").
+if exists("1:/chaos/modules/") = false createdir("1:/chaos/modules/").
+if exists("1:/chaos/libraries/") = false createdir("1:/chaos/libraries/").
+if exists("1:/chaos/programs/") = false createdir("1:/chaos/programs/").
 
 copypath("0:/chaos/chaosinit", "1:/chaos/chaosinit").
 copypath("0:/chaos/chaosinit", "1:/boot/").
