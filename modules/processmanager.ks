@@ -7,6 +7,10 @@ global function processmanager {
 
 global processrecord is lexicon().
 
+global newprocessqueue is list(queue(), queue(), queue(), queue()). // 0-3 by priority
+global newdaemonqueue is list(queue(), queue(), queue(), queue()).
+global newlistenerqueue is list(queue(), queue(), queue(), queue()).
+
 global processqueue is list(queue(), queue(), queue(), queue()). // 0-3 by priority
 global daemonqueue is list(queue(), queue(), queue(), queue()).
 global listenerqueue is list(queue(), queue(), queue(), queue()).
@@ -69,7 +73,7 @@ function spawnProcess {
 
 	local newprocess is makeprocess(funcobject:delegate@, "p",
 		priority, state, funcobject:type, source).
-	processqueue[priority]:push(newprocess:PID).
+	newprocessqueue[priority]:push(newprocess:PID).
 
 	return newprocess.
 }
@@ -83,7 +87,7 @@ function spawnDaemon {
 
 	local newprocess is makeprocess(funcobject:delegate@, "d",
 		priority, state, funcobject:type, source, frequencyratio).
-	daemonqueue[priority]:push(newprocess:PID).
+	newdaemonqueue[priority]:push(newprocess:PID).
 
 	return newprocess.
 }
@@ -103,7 +107,7 @@ function spawnListener {
 	local newprocess is makeprocess(funcobject:delegate@, "l",
 		priority, state, funcobject:type, source, 0,
 		true, listenerobject:delegate@, listenerobject:type, listenersource).
-	listenerqueue[priority]:push(newprocess:PID).
+	newlistenerqueue[priority]:push(newprocess:PID).
 
 	return newprocess.
 }
@@ -138,6 +142,8 @@ function iterateOverQueues {
 	for priority in range(3, 0-1) {
 		if time:seconds <> startTime { break. }.
 
+		until newlistenerqueue[priority]:empty listenerqueue[priority]:push(newlistenerqueue[priority]:pop()).
+
 		for l in range(listenerqueue[priority]:length) {
 			if time:seconds <> startTime { break. }.
 			local listener is listenerqueue[priority]:pop().
@@ -149,6 +155,8 @@ function iterateOverQueues {
 			} else if processrecord[listener]:alive { listenerqueue[priority]:push(listener). }.
 		}
 
+		until newdaemonqueue[priority]:empty daemonqueue[priority]:push(newdaemonqueue[priority]:pop()).
+
 		for d in range(daemonqueue[priority]:length) {
 			if time:seconds <> startTime { break. }.
 			local daemon is daemonqueue[priority]:pop().
@@ -159,6 +167,8 @@ function iterateOverQueues {
 			}
 			if processrecord[daemon]:alive { daemonqueue[priority]:push(daemon). }.
 		}
+
+		until newprocessqueue[priority]:empty processqueue[priority]:push(newprocessqueue[priority]:pop()).
 
 		until processqueue[priority]:empty() or time:seconds <> startTime {
 			local PIDToExecute is processqueue[priority]:pop().
