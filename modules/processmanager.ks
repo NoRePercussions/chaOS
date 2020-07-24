@@ -67,7 +67,7 @@ function makeProcess {
 function spawnProcess {
 	parameter func, priority is 0, state is list().
 	local source is "".
-	local funcobject is smartType(func).
+	local funcobject is module:utilities:smartType(func).
 	if funcobject:type = "reference" { set source to funcobject:reference. }.
 	if funcobject:type = "stringFunction" { set source to funcobject:string. }.
 	if funcobject:type = "delegate" { module:utilities:raiseWarning("Delegates cannot be saved and will be discarded on restart"). }.
@@ -82,7 +82,7 @@ function spawnProcess {
 function spawnDaemon {
 	parameter func, priority is 0, state is list(), frequencyratio is 1.
 	local source is "".
-	local funcobject is smartType(func).
+	local funcobject is module:utilities:smartType(func).
 	if funcobject:type = "reference" { set source to funcobject:reference. }.
 	if funcobject:type = "stringFunction" { set source to funcobject:string. }.
 	if funcobject:type = "delegate" { module:utilities:raiseWarning("Delegates cannot be saved and will be discarded on restart"). }.
@@ -97,8 +97,8 @@ function spawnDaemon {
 function spawnListener {
 	parameter listenerfunc, func, priority is 0, state is list().
 	local source is "".
-	local listenerobject is smartType(listenerfunc).
-	local funcobject is smartType(func).
+	local listenerobject is module:utilities:smartType(listenerfunc).
+	local funcobject is module:utilities:smartType(func).
 	if funcobject:type = "reference" { set source to funcobject:reference. }.
 	if funcobject:type = "stringFunction" { set source to funcobject:string. }.
 	if funcobject:type = "delegate" { module:utilities:raiseWarning("Delegates cannot be saved and will be discarded on restart"). }.
@@ -116,22 +116,12 @@ function spawnListener {
 	return newprocess.
 }
 
-function smartType {
-	parameter unknown.
+global function await {
+	parameter waittime, func, priority is 0, state is list().
 
-	if unknown:typename = "List" {
-		return unknown.
-	} else if unknown:typename = "UserDelegate" {
-		return module:utilities:delegate(unknown).
-	} else if unknown:typename = "string" {
-		if unknown:contains(".") {
-			return module:utilities:stringFunction(unknown).
-		} else {
-			return module:utilities:reference(unknown).
-		}
-	}
-
-	return unknown.
+	spawnListener(
+		"return time:seconds >= " + time:seconds + waittime	+ ".",
+		func, priority, state ).
 }
 
 function executeProcessByPID {
@@ -260,10 +250,10 @@ local self is lexicon(
 	"spawnProcess", spawnProcess@,
 	"spawnDaemon", spawnDaemon@,
 	"spawnListener", spawnListener@,
+	"await", await@,
 	"respawnProcess", respawnProcess@,
 	"removeProcess", removeProcess@,
 	"executeProcessByPID", executeProcessByPID@,
-	"smartType", smartType@.
 	"iterateOverQueues", iterateOverQueues@,
 	"garbageCollector", garbageCollector@,
 	"unpackListToParams", unpackListToParams@,
