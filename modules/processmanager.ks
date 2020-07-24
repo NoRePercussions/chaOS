@@ -15,7 +15,7 @@ global processqueue is list(queue(), queue(), queue(), queue()). // 0-3 by prior
 global daemonqueue is list(queue(), queue(), queue(), queue()).
 global listenerqueue is list(queue(), queue(), queue(), queue()).
 
-local updatecycle is 0.
+global updatecycle is 0.
 local processorcycle is 0.
 
 function makeProcess {
