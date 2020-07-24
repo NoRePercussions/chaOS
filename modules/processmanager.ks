@@ -65,8 +65,9 @@ function makeProcess {
 }
 
 function spawnProcess {
-	parameter funcobject, priority is 0, state is list().
+	parameter func, priority is 0, state is list().
 	local source is "".
+	local funcobject is smartType(func).
 	if funcobject:type = "reference" { set source to funcobject:reference. }.
 	if funcobject:type = "stringFunction" { set source to funcobject:string. }.
 	if funcobject:type = "delegate" { module:utilities:raiseWarning("Delegates cannot be saved and will be discarded on restart"). }.
@@ -79,8 +80,9 @@ function spawnProcess {
 }
 
 function spawnDaemon {
-	parameter funcobject, priority is 0, state is list(), frequencyratio is 1.
+	parameter func, priority is 0, state is list(), frequencyratio is 1.
 	local source is "".
+	local funcobject is smartType(func).
 	if funcobject:type = "reference" { set source to funcobject:reference. }.
 	if funcobject:type = "stringFunction" { set source to funcobject:string. }.
 	if funcobject:type = "delegate" { module:utilities:raiseWarning("Delegates cannot be saved and will be discarded on restart"). }.
@@ -93,8 +95,10 @@ function spawnDaemon {
 }
 
 function spawnListener {
-	parameter listenerobject, funcobject, priority is 0, state is list().
+	parameter listenerfunc, func, priority is 0, state is list().
 	local source is "".
+	local listenerobject is smartType(listenerfunc).
+	local funcobject is smartType(func).
 	if funcobject:type = "reference" { set source to funcobject:reference. }.
 	if funcobject:type = "stringFunction" { set source to funcobject:string. }.
 	if funcobject:type = "delegate" { module:utilities:raiseWarning("Delegates cannot be saved and will be discarded on restart"). }.
@@ -110,6 +114,24 @@ function spawnListener {
 	newlistenerqueue[priority]:push(newprocess:PID).
 
 	return newprocess.
+}
+
+function smartType {
+	parameter unknown.
+
+	if unknown:typename = "List" {
+		return unknown.
+	} else if unknown:typename = "UserDelegate" {
+		return module:utilities:delegate(unknown).
+	} else if unknown:typename = "string" {
+		if unknown:contains(".") {
+			return module:utilities:stringFunction(unknown).
+		} else {
+			return module:utilities:reference(unknown).
+		}
+	}
+
+	return unknown.
 }
 
 function executeProcessByPID {
@@ -241,6 +263,7 @@ local self is lexicon(
 	"respawnProcess", respawnProcess@,
 	"removeProcess", removeProcess@,
 	"executeProcessByPID", executeProcessByPID@,
+	"smartType", smartType@.
 	"iterateOverQueues", iterateOverQueues@,
 	"garbageCollector", garbageCollector@,
 	"unpackListToParams", unpackListToParams@,

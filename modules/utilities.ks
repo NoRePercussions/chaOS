@@ -92,6 +92,24 @@ function stringFunction {
 	return object.
 }
 
+function smartType {
+	parameter unknown.
+
+	if unknown:typename = "List" {
+		return unknown.
+	} else if unknown:typename = "UserDelegate" {
+		return module:utilities:delegate(unknown).
+	} else if unknown:typename = "string" {
+		if unknown:contains(".") {
+			return module:utilities:stringFunction(unknown).
+		} else {
+			return module:utilities:reference(unknown).
+		}
+	}
+
+	return unknown.
+}
+
 
 return lexicon(
 	"textToRef", textToRef@,
@@ -101,7 +119,8 @@ return lexicon(
 	"throwError", raiseError@,
 	"delegate", delegate@,
 	"reference", reference@,
-	"stringFunction", stringFunction@
+	"stringFunction", stringFunction@,
+	"smartType", smartType@
 ).
 
 }
