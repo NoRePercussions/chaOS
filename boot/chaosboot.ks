@@ -86,7 +86,7 @@ list files in modulelist.
 for opmodule in modulelist {
 	local truncmodule is opmodule:name:split(".ks")[0].
 	local protected is false.
-	if list("modulemanager", "processmanager", "utilities", "ui", "savestate", "commandline")
+	if list("modulemanager", "processmanager", "utilities", "ui", "savestate", "commandline", "control")
 		:contains(truncmodule) {
 		set protected to true.
 	}
