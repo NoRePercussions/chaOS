@@ -33,6 +33,7 @@ function compileControls {
 		else if throtsource:typename <> "UserDelegate" { compiled:add("throttle", throtsource). }.
 	if stsource:typename = "List" { compiled:add("steering", stsource:remove("delegate")). }
 		else if stsource:typename <> "UserDelegate" { compiled:add("steering", stsource). }.
+	if sas compiled:add("sas", sasmode).
 	return compiled.
 }
 
@@ -82,15 +83,15 @@ function restoreSteering {
 
 	if controls:haskey("throttle") {
 		local cthrottle is controls:throttle.
-		if cthrottle:typename = "List" {
-			if cthrottle:reftype = "delegate" {
+		if cthrottle:typename = "Lexicon" {
+			if cthrottle:type = "delegate" {
 				// No data to go based on, so no reference made
-			} else if cthrottle:reftype = "stringFunction" {
-				set throtsource to module:utilities:stringFunction(cthrottle:source).
+			} else if cthrottle:type = "stringFunction" {
+				set throtsource to module:utilities:stringFunction(cthrottle:string).
 				lock throtval to throtsource:delegate().
 				lock throttle to throtval.
-			} else if cthrottle:reftype = "reference" {
-				set throtsource to module:utilities:reference(cthrottle:source).
+			} else if cthrottle:type = "reference" {
+				set throtsource to module:utilities:reference(cthrottle:path).
 				lock throtval to throtsource:delegate().
 				lock throttle to throtval.
 
@@ -104,15 +105,15 @@ function restoreSteering {
 
 	if controls:haskey("steering") {
 		local csteering is controls:steering.
-		if csteering:typename = "List" {
-			if csteering:reftype = "delegate" {
+		if csteering:typename = "Lexicon" {
+			if csteering:type = "delegate" {
 				// No data to go based on, so no reference made
-			} else if csteering:reftype = "stringFunction" {
-				set stsource to module:utilities:stringFunction(csteering:source).
+			} else if csteering:type = "stringFunction" {
+				set stsource to module:utilities:stringFunction(csteering:string).
 				lock stval to stsource:delegate().
 				lock steering to stval.
-			} else if csteering:reftype = "reference" {
-				set stsource to module:utilities:reference(csteering:source).
+			} else if csteering:type = "reference" {
+				set stsource to module:utilities:reference(csteering:path).
 				lock stval to stsource:delegate().
 				lock steering to stval.
 
@@ -123,6 +124,11 @@ function restoreSteering {
 			lock steering to stval.
 		}
 	}
+
+	if controls:haskey("sas") {
+		sas on. wait 0.
+		set sasmode to controls:sas.
+	} else sas off.
 }
 
 local self is lexicon(
