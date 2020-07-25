@@ -83,6 +83,12 @@ be postponed by one if there is no more execution time left in the tick. They
 are great for initial calculations, setup, and anything else that runs once.
 
 
+Note: There are three more queue lists, one for each active queue list, where 
+new processes are added. At the start of each tick their contents will be moved 
+to the active queues. This prevents adding new items to a queue that is currently 
+being iterated on.
+
+
 Public ProcessManager Functions
 -------------------------------
 
@@ -108,6 +114,15 @@ the queue. It simplifies the required information for generation significantly f
 makeProcess for ease of use. Processes spawned will be added to the 
 process queue and executed on the next update tick if not killed.
 
+Valid executables are as follows:
+
+- string: A string containing a function, such as "print 'Hello world!'." Apostrophes are valid.
+- path reference: A string containing a reference to the function, such as "module:ui:addConfigWidget"
+- delegate: A delegate to a function. This type will not be saved by chaOS.
+
+Any of these can be passed straight in to have their type auto-selected 
+or can be manually selected with the utilities module before being passed in.
+
 
 spawnDaemon
 ~~~~~~~~~~~
@@ -127,7 +142,8 @@ SpawnDaemon generates a daemon of the class process via makeProcess and adds it 
 the daemon queue. Daemons are processes that are run at some set frequency. Daemons 
 spawned will be added to the queue and will be executed starting within 25 update ticks 
 or less. This offset is randomly applied to daemons to prevent multiple daemons spawned by 
-the same function from triggering in the same ticks to spread out computation.
+the same function from triggering in the same ticks to spread out computation. See spawnProcess 
+for more information about executable objects.
 
 For example, the processmanager garbage collector daemon runs every 500 ticks.
 
@@ -150,7 +166,16 @@ SpawnListener generates a listener of the class process via makeProcess and adds
 the listener queue. Listeners are designed to be low-overhead methods of waiting for a 
 condition to execute. Instead of, for example, a daemon that checks a condition, listeners 
 skip over most of the process execution setup and simply run the condition test function. 
-Listeners will be checked once every update tick.
+Listeners will be checked once every update tick. See spawnProcess 
+for more information about executable objects.
+
+Note: A function passed in for the listener condition must return ``true`` or ``false``. 
+For example, the string ``"return eta:apoapsis < 30."`` would be valid, while 
+``"eta:apoapsis < 30."`` **would not be**.
+
+
+await
+~~~~~
 
 
 removeProcess

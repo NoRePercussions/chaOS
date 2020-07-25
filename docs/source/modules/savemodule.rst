@@ -16,6 +16,14 @@ of chaOS, including all process data and configs,
 to a set of files on the core filesystem. The state 
 is typically saved at the start of each update tick.
 
+All of the following are saved:
+
+- Process record
+- All 6 queue lists
+- Global chaOS Config
+- Steering and throttle (if set through the control module)
+- SAS toggle and mode
+
 
 Limitations
 -----------
@@ -38,6 +46,7 @@ Saves the current state of chaOS, including the following:
 - The process record -> savedata/processrecord.dat
 - All process queues -> savedata/queues.dat
 - Configuration data -> savedata/config.dat
+- Control data       -> savedata/control.dat
 
 Before saving, the processrecord data is stripped of delegates. 
 These delegates will be reconstructed later when loaded.

@@ -136,3 +136,23 @@ execObject - an executable object of type stringfunction in the following list:
 The stringFunction utility creates a chaOS executable object from a string, 
 creating a function along the way. 
 This can be passed into process spawning functions.
+
+
+smartType
+~~~~~~~~~
+
+Parameters:
+
+Unknown - A valid executable with type unknown
+
+Returns:
+
+execObject - A typed executable, or the unknown if it is not valid.
+
+
+This function automatically selects an executable type from stringFunction, 
+reference, and delegate and creates an executable object, or returns the input 
+if it is already an executable or cannot be typed. This reduces the extra code 
+and understanding needed to manually type and create executable objects, though 
+manually creating executable objects is still valid. This is used when spawning 
+processes in processmanager and setting controls in the control module.
