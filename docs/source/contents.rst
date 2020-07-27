@@ -9,6 +9,7 @@ Table of Contents
     :maxdepth: 5
 
     Home <index>
+    Theory <theory>
     Tutorials <tutorials>
     Modules <modules>
     Table of Contents <self>

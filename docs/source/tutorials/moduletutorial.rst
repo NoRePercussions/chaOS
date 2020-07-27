@@ -8,6 +8,10 @@ interact with other modules, we will
 make a small module that can control 
 Telnet in kOS.
 
+.. contents::
+	:local:
+	:depth: 2
+
 Getting Started: Module Structure
 ---------------------------------
 
@@ -70,6 +74,52 @@ these functions! To do this, we must
 expose these functions to chaOS.
 
 
+Making a GUI
+------------
+
+This part may be confusing for new kOS coders or 
+anyone who does not work with GUIs. In addition, 
+there are some weird bugs that necessitate more 
+code that is unclear. I will just provide a 
+prebuilt function for now.
+
+The notable part is that the function must take a 
+parameter of the GUI body and add all elements to 
+it.
+
+::
+
+	function makeTelnetConfig {
+		parameter body.
+		local container is body:addhbox().
+		local telnetOn is container:addcheckbox("Telnet", config:telnet).
+		set telnetOn:ontoggle to { parameter state. toggleTelnet(state). }.
+		local telnetPort is container:addtextfield(config:tport:tostring).
+		set nextdebouncetime to time:seconds + 0.2.
+		set telnetPort:onconfirm to {
+			parameter newtport.
+			if newtport:length = 0 or time:seconds < nextdebouncetime return.
+			set nextdebouncetime to time:seconds + 0.2.
+			changePort(newtport:toscalar).
+		}.
+
+	}
+
+
+Onload and Adding the GUI
+-------------------------
+
+The `onload` function will run when 
+all modules and libraries have been 
+loaded. We can use the UI module for 
+adding our GUI.
+
+::
+
+	function onload {
+		module:ui:addConfigWidget(makeTelnetConfig@).
+	}
+
 Exposing Public Functions
 -------------------------
 
@@ -84,7 +134,8 @@ Again, this will go at the end of the `telnet` function.
 
 	local self is lexicon(
 		"toggleTelnet", toggleTelnet@,
-		"changePort", changePort@
+		"changePort", changePort@,
+		"onload", onload@
 	).
 
 Finally, all we need to do now is return the lexicon 
@@ -112,6 +163,8 @@ Our two functions are accessible as:
 	module:telnet:toggleTelnet()
 	module:telnet:changePort()
 
+You can also see the GUI settings by going to 
+the Config menu when chaOS is booted.
 
 Final Code
 ----------
@@ -122,7 +175,7 @@ Final Code
 
 	// telnet.ks
 	// telnet configuration module
-	
+
 	global function telnet {
 		
 		function toggleTelnet {
@@ -136,14 +189,35 @@ Final Code
 			
 			set config:tport to newPort.
 		}
-		
+
+		function makeTelnetConfig {
+			parameter body.
+			local container is body:addhbox().
+			local telnetOn is container:addcheckbox("Telnet", config:telnet).
+			set telnetOn:ontoggle to { parameter state. toggleTelnet(state). }.
+			local telnetPort is container:addtextfield(config:tport:tostring).
+			set nextdebouncetime to time:seconds + 0.2.
+			set telnetPort:onconfirm to {
+				parameter newtport.
+				if newtport:length = 0 or time:seconds < nextdebouncetime return.
+				set nextdebouncetime to time:seconds + 0.2.
+				changePort(newtport:toscalar).
+			}.
+
+		}
+
+		function onload {
+		module:ui:addConfigWidget(makeTelnetConfig@).
+		}
+	
 		local self is lexicon(
 			"toggleTelnet", toggleTelnet@,
-			"changePort", changePort@
+			"changePort", changePort@,
+			"onload", onload@
 		).
 		
 		return self.
 		
 	}
-	
-	global loadingmodule is utilities@.
+
+	global loadingmodule is telnet@.

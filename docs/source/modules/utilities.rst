@@ -99,6 +99,7 @@ reference
 Parameters:
 
 referencePath - a path to the function in its module or library
+
 	ex. 'module:utilities:throwWarning' with state ('This is a warning')
 
 
