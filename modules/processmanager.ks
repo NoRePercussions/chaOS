@@ -25,12 +25,9 @@ function makeProcess {
 	frequencyratio is 1,
 	listener is false, listenerref is 0,
 	listenertype is "", listenersource is "",
-	alive is true, name is 0,
-	parent is -1, retain is false.
+	alive is true, retain is false, parent is -1.
 
 	local children is list().
-
-	if name = 0 { set name to chaOSConfig:nextPID. }.
 
 	local newprocess is lexicon().
 	newprocess:add("func", func).
@@ -43,7 +40,6 @@ function makeProcess {
 	newprocess:add("frequencyratio", frequencyratio).
 	newprocess:add("frequencyoffset", floor(random()*25)).
 	newprocess:add("priority", priority).
-	newprocess:add("name", name).
 	newprocess:add("parent", parent).
 	newprocess:add("children", children).
 	newprocess:add("retain", retain).
@@ -95,7 +91,7 @@ function spawnDaemon {
 }
 
 function spawnListener {
-	parameter listenerfunc, func, priority is 0, state is list().
+	parameter listenerfunc, func, priority is 0, state is list(), retain is false.
 	local source is "".
 	local listenerobject is module:utilities:smartType(listenerfunc).
 	local funcobject is module:utilities:smartType(func).
@@ -110,7 +106,7 @@ function spawnListener {
 
 	local newprocess is makeprocess(funcobject:delegate@, "l",
 		priority, state, funcobject:type, source, 0,
-		true, listenerobject:delegate@, listenerobject:type, listenersource).
+		true, listenerobject:delegate@, listenerobject:type, listenersource, true, retain).
 	newlistenerqueue[priority]:push(newprocess:PID).
 
 	return newprocess.
@@ -119,7 +115,7 @@ function spawnListener {
 global function await {
 	parameter waittime, func, priority is 0, state is list().
 
-	spawnListener(
+	return spawnListener(
 		"return time:seconds >= " + time:seconds + waittime	+ ".",
 		func, priority, state ).
 }
@@ -163,7 +159,8 @@ function iterateOverQueues {
 				set self to processrecord[listener].
 				set processrecord[listener]
 				:returnValue to executeProcessByPID(listener).
-				removeProcess(listener).
+				if processrecord[listener]:retain { listenerqueue[priority]:push(listener). }
+				else removeProcess(listener).
 			} else if processrecord[listener]:alive { listenerqueue[priority]:push(listener). }.
 		}
 
@@ -198,7 +195,7 @@ function iterateOverQueues {
 
 function garbageCollector {
 	for oldProcessKey in processrecord:keys {
-		if processrecord[oldProcessKey]:retain = false and processrecord[oldProcessKey]:alive = false {
+		if processrecord[oldProcessKey]:alive = false {
 			processrecord:remove(oldProcessKey). 
 		}
 	}
