@@ -7,11 +7,11 @@ global function processmanager {
 
 global processrecord is lexicon().
 
-global newprocessqueue is list(queue(), queue(), queue(), queue()). // 0-3 by priority
+global newtaskqueue is list(queue(), queue(), queue(), queue()). // 0-3 by priority
 global newdaemonqueue is list(queue(), queue(), queue(), queue()).
 global newlistenerqueue is list(queue(), queue(), queue(), queue()).
 
-global processqueue is list(queue(), queue(), queue(), queue()). // 0-3 by priority
+global taskqueue is list(queue(), queue(), queue(), queue()). // 0-3 by priority
 global daemonqueue is list(queue(), queue(), queue(), queue()).
 global listenerqueue is list(queue(), queue(), queue(), queue()).
 
@@ -19,7 +19,7 @@ global updatecycle is 0.
 local processorcycle is 0.
 
 function makeProcess {
-	parameter func, ptype is "p",
+	parameter func, ptype is "t",
 	priority is 0, state is list(),
 	reftype is "delegate", source is "",
 	frequencyratio is 1,
@@ -64,7 +64,7 @@ function makeProcess {
 	return newprocess.
 }
 
-function spawnProcess {
+function spawnTask {
 	parameter func, priority is 0, state is list().
 	local source is "".
 	local funcobject is module:utilities:smartType(func).
@@ -72,11 +72,11 @@ function spawnProcess {
 	if funcobject:type = "stringFunction" { set source to funcobject:string. }.
 	if funcobject:type = "delegate" { module:utilities:raiseWarning("Delegates cannot be saved and will be discarded on restart"). }.
 
-	local newprocess is makeprocess(funcobject:delegate@, "p",
+	local newtask is makeprocess(funcobject:delegate@, "t",
 		priority, state, funcobject:type, source).
-	newprocessqueue[priority]:push(newprocess:PID).
+	newtaskqueue[priority]:push(newtask:PID).
 
-	return newprocess.
+	return newtask.
 }
 
 function spawnDaemon {
@@ -160,9 +160,10 @@ function iterateOverQueues {
 			if time:seconds <> startTime { break. }.
 			local listener is listenerqueue[priority]:pop().
 			if processrecord[listener]:listenerref:call() and processrecord[listener]:alive {
+				set self to processrecord[listener].
 				set processrecord[listener]
 				:returnValue to executeProcessByPID(listener).
-				self:removeProcess(listener).
+				removeProcess(listener).
 			} else if processrecord[listener]:alive { listenerqueue[priority]:push(listener). }.
 		}
 
@@ -171,19 +172,22 @@ function iterateOverQueues {
 		for d in range(daemonqueue[priority]:length) {
 			if time:seconds <> startTime { break. }.
 			local daemon is daemonqueue[priority]:pop().
-			if mod(processorcycle + processrecord[daemon]:frequencyoffset, 1/processrecord[daemon]:frequencyratio) >= 1 {
+			if mod(processorcycle + processrecord[daemon]:frequencyoffset, 1/processrecord[daemon]:frequencyratio) >= 1 
+			and processrecord[daemon]:alive {
 				local PIDToExecute is daemon.
+				set self to processrecord[daemon].
 				set processrecord[PIDToExecute]
 				:returnValue to executeProcessByPID(PIDToExecute)().
 			}
 			if processrecord[daemon]:alive { daemonqueue[priority]:push(daemon). }.
 		}
 
-		until newprocessqueue[priority]:empty processqueue[priority]:push(newprocessqueue[priority]:pop()).
+		until newtaskqueue[priority]:empty taskqueue[priority]:push(newtaskqueue[priority]:pop()).
 
-		until processqueue[priority]:empty() or time:seconds <> startTime {
-			local PIDToExecute is processqueue[priority]:pop().
+		until taskqueue[priority]:empty() or time:seconds <> startTime {
+			local PIDToExecute is taskqueue[priority]:pop().
 			if processrecord[PIDToExecute]:alive {
+				set self to processrecord[PIDToExecute].
 				set processrecord[PIDToExecute]
 				:returnValue to executeProcessByPID(PIDToExecute)().
 				removeProcess(PIDToExecute).
@@ -244,9 +248,9 @@ function configWidget {
 	local upslabel is speedbox:addlabel("UPS").
 }
 
-local self is lexicon(
+return lexicon(
 	"makeProcess", makeProcess@,
-	"spawnProcess", spawnProcess@,
+	"spawnTask", spawnTask@,
 	"spawnDaemon", spawnDaemon@,
 	"spawnListener", spawnListener@,
 	"await", await@,
@@ -258,8 +262,6 @@ local self is lexicon(
 	"unpackListToParams", unpackListToParams@,
 	"onload", onload@
 ).
-
-return self.
 
 }
 
