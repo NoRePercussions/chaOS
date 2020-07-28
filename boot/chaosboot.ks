@@ -15,7 +15,7 @@ copyModules(loaded[0]).
 copyLibraries(loaded[1]).
 
 cd("1:/chaos/").
-set core:bootfilename to "chaosinit.ks".
+set core:bootfilename to "chaos/chaosinit.ks".
 wait 0.
 run chaosinit.
 

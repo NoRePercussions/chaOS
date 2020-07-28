@@ -4,7 +4,10 @@ global function savestate {
 
 local savefolder is "1:/chaos/savedata/".
 
+chaOSConfig:add("save", true).
+
 function saveCurrentState {
+	if chaOSConfig:save = false return.
 	writejson(chaOSConfig, savefolder + "config.dat").
 	writejson(compileProcesses(), savefolder + "processrecord.dat").
 	local queuelist is list(newprocessqueue, newdaemonqueue, newlistenerqueue,
@@ -131,9 +134,39 @@ function restoreSteering {
 	} else sas off.
 }
 
+function saveConfig {
+	parameter body.
+
+	local saving is body:addcheckbox("Autosave chaOS state", chaOSConfig:save).
+	set saving:ontoggle to { parameter state. set chaOSConfig:save to state. }.
+}
+
+function toggleSave {
+	parameter state is 0.
+	if state:typename = "Scalar" {
+		saveCurrentState().
+		module:ui:record("Saved chaOS's state").
+	} else {
+		if list("true", "1", 1, true, "on"):contains(state) {
+			set chaOSConfig:save to true.
+			module:ui:record("Set chaOS autosave to on").
+		} else if list("false", "0", 0, false, "off"):contains(state) {
+			set chaOSConfig:save to false.
+			module:ui:record("Set chaOS autosave to off").
+		}
+	}
+}
+
+function onload {
+	module:ui:addConfigWidget(saveConfig@).
+	module:commandline:addCustomCommand("save", toggleSave@, 0, 1,
+	"save {true/false} - If no argument is specified, saves chaOS, otherwise sets autosave to specified state.").
+}
+
 local self is lexicon(
 	"saveCurrentState", saveCurrentState@,
-	"loadSavedState", loadSavedState@
+	"loadSavedState", loadSavedState@,
+	"onload", onload@
 ).
 
 return self.

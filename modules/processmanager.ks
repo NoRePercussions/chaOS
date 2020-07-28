@@ -160,7 +160,6 @@ function iterateOverQueues {
 			if time:seconds <> startTime { break. }.
 			local listener is listenerqueue[priority]:pop().
 			if processrecord[listener]:listenerref:call() and processrecord[listener]:alive {
-				print "executing listener".
 				set processrecord[listener]
 				:returnValue to executeProcessByPID(listener).
 				self:removeProcess(listener).
