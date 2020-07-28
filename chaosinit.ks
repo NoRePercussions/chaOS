@@ -1,4 +1,5 @@
 // chaosinit.ks
+@lazyglobal off.
 clearscreen.
 cd("1:/chaos/").
 
@@ -42,11 +43,12 @@ function startup {
 function POST {
 	parameter testval.
 	module:ui:debug("This is a " + testval + " message").
+	module:ui:debug("My PID is: " + self:PID).
 	return "This is a test return".
 }
 
 function test {
-	local processPID is module:processmanager:spawnProcess(
+	local processPID is module:processmanager:spawnTask(
 		module:utilities:delegate(POST@), 1, list("test")):PID.
 	module:processmanager:spawnListener(
 		module:utilities:stringFunction("if time:seconds >=  10 + " + time:seconds + " return true. return false."),

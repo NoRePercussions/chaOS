@@ -175,7 +175,7 @@ global function ui {
 		module:processmanager:spawndaemon(module:utilities:reference("module:ui:updateActiveGUI"), 3, list(), 1/5).
 	}
 
-	local self is lexicon(
+	return lexicon(
 		"fulldebug", fulldebug,
 		"nodebug", nodebug,
 		"gui", gui,
@@ -187,8 +187,6 @@ global function ui {
 		"enterEditMode", enterEditMode@,
 		"onload", onload@
 	).
-
-	return self.
 }
 
 global loadingmodule is ui@.

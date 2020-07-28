@@ -30,14 +30,12 @@ function setThrottle {
 
 function releaseThrottle { unlock throttle. }
 
-local self is lexicon (
+return lexicon (
 	"setSteering", setSteering@,
 	"releaseSteering", releaseSteering@,
 	"setThrottle", setThrottle@,
 	"releaseThrottle", releaseThrottle@
 ).
-
-return self.
 
 }
 

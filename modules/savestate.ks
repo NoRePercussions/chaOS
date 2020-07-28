@@ -10,8 +10,8 @@ function saveCurrentState {
 	if chaOSConfig:save = false return.
 	writejson(chaOSConfig, savefolder + "config.dat").
 	writejson(compileProcesses(), savefolder + "processrecord.dat").
-	local queuelist is list(newprocessqueue, newdaemonqueue, newlistenerqueue,
-		processqueue, daemonqueue, listenerqueue).
+	local queuelist is list(newtaskqueue, newdaemonqueue, newlistenerqueue,
+		taskqueue, daemonqueue, listenerqueue).
 	writejson(queuelist, savefolder + "queues.dat").
 	writejson(compileControls(), savefolder + "controls.dat").
 }
@@ -44,10 +44,10 @@ function loadSavedState {
 	chaOSConfig:clear. set chaOSConfig to readjson(savefolder + "config.dat").
 
 	local queuelist is readjson(savefolder + "queues.dat").
-	newprocessqueue:clear(). set newprocessqueue to queuelist[0].
+	newtaskqueue:clear(). set newtaskqueue to queuelist[0].
 	newdaemonqueue:clear(). set newdaemonqueue to queuelist[1].
 	newlistenerqueue:clear(). set newlistenerqueue to queuelist[2].
-	processqueue:clear(). set processqueue to queuelist[3].
+	taskqueue:clear(). set taskqueue to queuelist[3].
 	daemonqueue:clear(). set daemonqueue to queuelist[4].
 	listenerqueue:clear(). set listenerqueue to queuelist[5].
 
@@ -163,13 +163,11 @@ function onload {
 	"save {true/false} - If no argument is specified, saves chaOS, otherwise sets autosave to specified state.").
 }
 
-local self is lexicon(
+return lexicon(
 	"saveCurrentState", saveCurrentState@,
 	"loadSavedState", loadSavedState@,
 	"onload", onload@
 ).
-
-return self.
 
 }
 
