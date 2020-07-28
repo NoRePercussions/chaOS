@@ -121,9 +121,7 @@ Our final listener will be:
 		"library:launch:gravityTurn").
 
 
-We can also make a daemon that checks if we need to stage. 
-We will use a daemon because listeners get despawned after 
-being run.
+We can also make a listener that checks if we need to stage. 
 
 We will check if our ship's thrust has dropped since last 
 checked. To do this, we need to initialize a global variable 
@@ -134,15 +132,15 @@ to hold the last value:
 	chaOSConfig:add("targetThrust", 10^20).
 
 We can set a priority of 3, the max; an empty state because 
-our daemon takes no parameters, and a frequency of 1/25 so 
-it runs twice a second. Our final spawn command is:
+our listener takes no parameters, and *preserve* set to true 
+to allow the listener to fire more than once. Our final spawn command is:
 
 ::
 
-	module:processmanager:spawnDaemon(
-		"if ship:maxthrust < chaOSConfig:targetThrust { stage. "
-			 + "set chaOSConfig:targetThrust to ship:maxthrust. print chaOSConfig:targetThrust. }.",
-		3, list(), 1/25).
+	module:processmanager:spawnListener(
+		"return ship:maxthrust < chaOSConfig:targetThrust.",
+		"stage. set chaOSConfig:targetThrust to ship:maxthrust.",
+		3, list(), true).
 
 
 The complete `launchnow` function is as follows:
@@ -279,7 +277,7 @@ easier to implement and understand than other
 methods. It will also work fairly well on the 
 majority of ships without a need to tune parameters, 
 and the entire script, even when compiled for chaOS, 
-only takes up 63 lines.
+only takes up 61 lineswith whitespace.
 
 The complete circularization function:
 
@@ -326,12 +324,12 @@ the function lexicon:
 * circularize
 * onload
 
-We can compile these in a `self` lexicon 
+We can compile these in a lexicon 
 and return it to `modulemanager`:
 
 ::
 
-	local self is lexicon(
+	return lexicon(
 		"launchnow", launchnow@,
 		"gravityTurn", gravityTurn@,
 		"circularize", circularize@,
@@ -415,14 +413,12 @@ Final Code
 		module:commandline:addCustomCommand("launch", launchnow@, 0,0, "launch - Launches the rocket!").
 	}
 
-	local self is lexicon(
+	return lexicon(
 		"launchnow", launchnow@,
 		"gravityTurn", gravityTurn@,
 		"circularize", circularize@,
 		"onload", onload@
 	).
-
-	return self.
 		
 	}
 

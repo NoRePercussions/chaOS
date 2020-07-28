@@ -49,6 +49,9 @@ Ex. the end of `processmanager.ks` reads:
 
 ``global loadingmodule is processmanager@.``
 
+where `processmanager` is the function surrounding 
+the module.
+
 
 Exposing module functions and variables
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -63,8 +66,8 @@ to the global lexicon `module:{modulename}`.
 Ex. `processmanager` returns the 
 lexicon pair ``{"spawnProcess", spawnProcess@}``
 
-and the `spawnProcess` function can be called with 
-``module:processmanager:spawnProcess({parameters}).``
+and the `spawnTask` function can be called with 
+``module:processmanager:spawnTask({parameters}).``
 
 
 Private variables and functions
