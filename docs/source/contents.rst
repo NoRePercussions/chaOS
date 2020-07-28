@@ -11,6 +11,7 @@ Table of Contents
     Home <index>
     Theory <theory>
     Tutorials <tutorials>
+    Commands <commands>
     Modules <modules>
     Table of Contents <self>
 
