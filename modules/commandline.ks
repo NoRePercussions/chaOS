@@ -18,6 +18,7 @@ local commandDatabase is lexicon(
 	"mv", lexicon("func", move@, "minparams", 1, "maxparams", 2, "man", "mv {frompath} [topath] - moves a file or directory from the frompath to topath (or else current path)"),
 	"man", lexicon("func", man@, "minparams", 1, "maxparams", 1, "man", "man {command} - Shows information about the command"),
 	"exit", lexicon("func", exit@, "minparams", 0, "maxparams", 0, "man", "exit - Exits chaOS"),
+	"run", lexicon("func", runcmd@, "minparams", 1, "maxparams", 1, "man", "run {filepath} - runs the selected file"),
 	"help", lexicon("func", help@, "minparams", 0, "maxparams", 0, "man", "help - Returns a list of CLI commands")
 ).
 
@@ -112,6 +113,12 @@ function exit {
 
 function help {
 	module:ui:record("Run man {command} for more information" + char(10) + commandDatabase:keys:join(char(10))).
+}
+
+function runcmd {
+	parameter filepath.
+	if exists(filepath) { runpath(filepath). }
+	else { print "File does not exist". }.
 }
 
 function parseFunction {
