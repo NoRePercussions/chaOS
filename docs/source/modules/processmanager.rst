@@ -49,7 +49,7 @@ is not a list.
 Queues
 ~~~~~~
 
-ProcessManager hold three lists: the process queue (one-off tasks), 
+ProcessManager hold three lists: the task queue (one-off tasks), 
 the daemon queue (repeated tasks), and the listener queue (conditional 
 tasks). Each list consists of four queues at the index of their priority, 
 with 3 being the most important and first executed. The internal queues 
@@ -65,7 +65,8 @@ typically skip most of the process loading steps and just test the
 condition, only loading the full process when the condition is met. 
 Best practice is to not put long computations into listener processes, 
 which slows the whole queue, but instead spawn a process or daemon once 
-the condition is met.
+the condition is met. Listeners can run once or continue operating even 
+after the condition has been met once.
 
 The daemon queue is executed next. Daemon-type processes run at a set 
 interval (for example one in five update ticks) and are staggered randomly 
@@ -76,9 +77,9 @@ scheduled tick. Daemons are great for any code that must be run repeatedly,
 no matter if they need to run often or infrequently. Daemons are especially 
 useful for repeated calculations or control updates if locks are not an option.
 
-The process queue is the final queue to be executed in each priority step. 
+The task queue is the final queue to be executed in each priority step. 
 Processes in this context are one-off tasks that will be run and then removed 
-from the queue. Processes will be run in the next available tick, and will be 
+from the queue. Tasks will be run in the next available tick, and will be 
 be postponed by one if there is no more execution time left in the tick. They 
 are great for initial calculations, setup, and anything else that runs once.
 
@@ -96,7 +97,7 @@ ProcessManager exposes a number of functions
 in the module:processmanager lexicon.
 
 
-spawnProcess
+spawnTask
 ~~~~~~~~~~~~
 
 Parameters:
@@ -109,10 +110,10 @@ Returns:
 
 PID: a number indicating which process is being referenced. Can be used as an index in processrecord.
 
-SpawnProcess generates a process of the class process via makeProcess and adds it to 
+SpawnTask generates a process of type task via makeProcess and adds it to 
 the queue. It simplifies the required information for generation significantly from 
-makeProcess for ease of use. Processes spawned will be added to the 
-process queue and executed on the next update tick if not killed.
+makeProcess for ease of use. Tasks spawned will be added to the 
+task queue and executed on the next update tick if not killed or delayed.
 
 Valid executables are as follows:
 
@@ -142,7 +143,7 @@ SpawnDaemon generates a daemon of the class process via makeProcess and adds it 
 the daemon queue. Daemons are processes that are run at some set frequency. Daemons 
 spawned will be added to the queue and will be executed starting within 25 update ticks 
 or less. This offset is randomly applied to daemons to prevent multiple daemons spawned by 
-the same function from triggering in the same ticks to spread out computation. See spawnProcess 
+the same function from triggering in the same ticks to spread out computation. See spawnTask 
 for more information about executable objects.
 
 For example, the processmanager garbage collector daemon runs every 500 ticks.
@@ -157,6 +158,7 @@ Parameters:
 - functionObject: an executable type object representing the function to be executed
 - priority [optional]: a number 0-3 representing the process priority
 - state [optional]: a list of parameters to be unpacked into the functionObject function on execution
+- retain [optional]: true/false if the listener should be preserved to run multiple times
 
 Returns:
 
@@ -166,7 +168,7 @@ SpawnListener generates a listener of the class process via makeProcess and adds
 the listener queue. Listeners are designed to be low-overhead methods of waiting for a 
 condition to execute. Instead of, for example, a daemon that checks a condition, listeners 
 skip over most of the process execution setup and simply run the condition test function. 
-Listeners will be checked once every update tick. See spawnProcess 
+Listeners will be checked once every update tick. See spawnTask 
 for more information about executable objects.
 
 Note: A function passed in for the listener condition must return ``true`` or ``false``. 
@@ -176,6 +178,19 @@ For example, the string ``"return eta:apoapsis < 30."`` would be valid, while
 
 await
 ~~~~~
+
+Parameters:
+
+- timeToExecution: Seconds to wait before execution
+- functionObject: an executable type object representing the function to be executed
+- priority [optional]: a number 0-3 representing the process priority
+- state [optional]: a list of parameters to be unpacked into the functionObject function on execution
+
+Returns:
+
+PID: a number indicating which process is being referenced. Can be used as an index in processrecord.
+
+A shortcut to spawn a listener that runs after a set time, similar to a `wait` function.
 
 
 removeProcess
