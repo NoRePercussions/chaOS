@@ -125,23 +125,16 @@ Exposing Public Functions
 
 All functions inside modules and libraries must 
 be returned to `modulemanager` through a lexicon 
-of functions. We will also make an internal `self` 
-lexicon for object-oriented programmers that prefer 
-using self as a reference to internal functions and variables.
-Again, this will go at the end of the `telnet` function.
+of functions. This just needs the names and 
+delegates to each function.
 
 ::
 
-	local self is lexicon(
+	return lexicon(
 		"toggleTelnet", toggleTelnet@,
 		"changePort", changePort@,
 		"onload", onload@
 	).
-
-Finally, all we need to do now is return the lexicon 
-to modulemanager.
-
-``return self.``
 
 
 Accessing Our Functions
@@ -210,13 +203,11 @@ Final Code
 		module:ui:addConfigWidget(makeTelnetConfig@).
 		}
 	
-		local self is lexicon(
+		return lexicon(
 			"toggleTelnet", toggleTelnet@,
 			"changePort", changePort@,
 			"onload", onload@
 		).
-		
-		return self.
 		
 	}
 
